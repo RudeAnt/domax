@@ -1,0 +1,70 @@
+/*
+  Дизайн-токены — временная нейтральная тема.
+  Дизайнер ещё не прислал макет, поэтому вся визуальная часть держится
+  в переменных здесь и в компонентах читается только через них.
+  Когда придёт дизайн — меняем значения в этом файле (и точечно классы
+  там, где реальный макет предполагает другую форму компонента),
+  вместо переписывания разметки.
+*/
+:root {
+  --color-bg: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-border: #e2e4e9;
+  --color-text: #1a1d24;
+  --color-text-muted: #6b7280;
+  --color-primary: #4f46e5;
+  --color-primary-contrast: #ffffff;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-warning: #d97706;
+  --color-warning-bg: #fffbeb;
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+
+  --status-registered-bg: #eef2ff;
+  --status-registered-text: #4338ca;
+  --status-in_progress-bg: #fffbeb;
+  --status-in_progress-text: #b45309;
+  --status-closed-bg: #f0fdf4;
+  --status-closed-text: #15803d;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #121317;
+    --color-surface: #1c1e24;
+    --color-border: #2c2f38;
+    --color-text: #f1f2f4;
+    --color-text-muted: #9aa0ab;
+    --color-primary: #818cf8;
+    --color-primary-contrast: #121317;
+    --color-danger: #f87171;
+    --color-danger-bg: #2a1414;
+    --color-warning: #fbbf24;
+    --color-warning-bg: #2a2110;
+    --color-success: #4ade80;
+    --color-success-bg: #12271a;
+
+    --status-registered-bg: #1e2140;
+    --status-registered-text: #a5b4fc;
+    --status-in_progress-bg: #2a2110;
+    --status-in_progress-text: #fbbf24;
+    --status-closed-bg: #12271a;
+    --status-closed-text: #4ade80;
+  }
+}
