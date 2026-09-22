@@ -1,13 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Заявки в УК</title>
+    <!--
+      MAX Bridge: даёт доступ к window.WebApp внутри клиента MAX
+      (пользователь, тема, BackButton, HapticFeedback и т.д.).
+      Вне клиента MAX (обычный браузер при локальной разработке) скрипт
+      либо не грузится, либо не создаёт window.WebApp — весь код в
+      src/lib/maxBridge.ts на это рассчитан и не падает в этом случае.
+      Источник: https://dev.max.ru/docs/webapps/bridge — перепроверьте
+      актуальный URL скрипта перед сдачей, сеть в моей среде разработки
+      блокировала доступ к dev.max.ru напрямую.
+    -->
+    <script src="https://st.max.ru/js/max-web-app.js"></script>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
