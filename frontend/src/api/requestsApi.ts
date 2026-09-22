@@ -9,6 +9,7 @@ export interface RequestsApi {
 
 const STORAGE_KEY = 'domax.requests.v1'
 const SIMULATED_LATENCY_MS = 300
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 function readFromStorage(): ServiceRequest[] {
   try {
@@ -70,6 +71,29 @@ function delay<T>(value: T): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), SIMULATED_LATENCY_MS))
 }
 
+// Немоковая реализация
+class HttpRequestsApi implements RequestsApi {
+  async list(): Promise<ServiceRequest[]> {
+    const res = await fetch(`${BASE_URL}/tickets`);
+    return res.json();
+  }
+
+  async get(id: string): Promise<ServiceRequest | undefined> {
+    const res = await fetch(`${BASE_URL}/tickets/${id}`);
+    if (!res.ok) return undefined;
+    return res.json();
+  }
+
+  async create(input: CreateRequestInput): Promise<ServiceRequest> {
+    const res = await fetch(`${BASE_URL}/tickets`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+    return res.json();
+  }
+}
+
 /**
  * Моковая реализация: хранит заявки в localStorage браузера, ничего не
  * отправляет на бэкенд. Позволяет фронту работать независимо от того,
@@ -102,4 +126,5 @@ class MockRequestsApi implements RequestsApi {
   }
 }
 
-export const requestsApi: RequestsApi = new MockRequestsApi()
+export const requestsApi: RequestsApi = new HttpRequestsApi();
+

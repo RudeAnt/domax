@@ -1,34 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
-import { UpdateTicketDto } from './dto/update-ticket.dto';
 
+@ApiTags('Tickets')
 @Controller('tickets')
 export class TicketsController {
-  constructor(private readonly ticketsService: TicketsService) {}
+  constructor(private readonly service: TicketsService) {}
 
   @Post()
-  create(@Body() createTicketDto: CreateTicketDto) {
-    return this.ticketsService.create(createTicketDto);
+  @ApiOperation({ summary: 'Создать заявку' })
+  create(@Body() dto: CreateTicketDto) {
+    return this.service.create(dto);
   }
 
   @Get()
+  @ApiOperation({ summary: 'Получить список всех заявок' })
   findAll() {
-    return this.ticketsService.findAll();
+    return this.service.findAll();
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Получить заявку по ID' })
   findOne(@Param('id') id: string) {
-    return this.ticketsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTicketDto: UpdateTicketDto) {
-    return this.ticketsService.update(+id, updateTicketDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ticketsService.remove(+id);
+    return this.service.findOne(id);
   }
 }
+

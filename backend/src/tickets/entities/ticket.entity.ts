@@ -1,16 +1,17 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
-export enum TicketCategory {
-  LEAK = 'LEAK',
-  ELEVATOR = 'ELEVATOR',
-  ELECTRIC = 'ELECTRIC',
-  OTHER = 'OTHER',
+export enum RequestCategory {
+  LEAK = 'leak',
+  ELEVATOR = 'elevator',
+  ELECTRICITY = 'electricity',
+  HEATING = 'heating',
+  OTHER = 'other',
 }
 
-export enum TicketStatus {
-  NEW = 'NEW',
-  IN_PROGRESS = 'IN_PROGRESS',
-  RESOLVED = 'RESOLVED',
+export enum RequestStatus {
+  REGISTERED = 'registered',
+  IN_PROGRESS = 'in_progress',
+  CLOSED = 'closed',
 }
 
 @Entity('tickets')
@@ -18,39 +19,36 @@ export class Ticket {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  title: string;
+  @Column({
+    type: 'enum',
+    enum: RequestCategory,
+    default: RequestCategory.OTHER,
+  })
+  category: RequestCategory;
 
   @Column('text')
   description: string;
 
-  @Column({
-    type: 'enum',
-    enum: TicketCategory,
-    default: TicketCategory.OTHER,
-  })
-  category: TicketCategory;
-
-  @Column({
-    type: 'enum',
-    enum: TicketStatus,
-    default: TicketStatus.NEW,
-  })
-  status: TicketStatus;
-
-  @Column({ nullable: true })
-  photoUrl: string;
-
   @Column()
   address: string;
 
-  @Column({ default: 1 })
-  entrance: number;
+  @Column()
+  phone: string;
 
-  @Column({ default: 0 })
-  upvotes: number;
+  @Column({ type: 'text', nullable: true })
+  photoDataUrl?: string;
 
-  @CreateDateColumn()
+  @Column({
+    type: 'enum',
+    enum: RequestStatus,
+    default: RequestStatus.REGISTERED,
+  })
+  status: RequestStatus;
+
+  @Column({ type: 'int', default: 24 })
+  resolutionHours: number;
+
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }
 
