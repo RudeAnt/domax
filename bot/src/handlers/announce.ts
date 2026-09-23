@@ -1,11 +1,12 @@
 import type { Context, FilteredContext } from '@maxhub/max-bot-api'
-import { getAllBotChats } from '../lib/getAllBotChats.js'
 import { isAdmin } from '../lib/isAdmin.js'
+import { getKnownChatIds } from '../lib/subscribers.js'
 
 /**
- * /announce <текст> — рассылает новость/объявление (например, об отключении
- * воды) во все групповые чаты, где состоит бот. Личные диалоги сознательно
- * не рассылаем — иначе это выглядит как спам конкретным людям без их запроса.
+ * /announce <текст> — рассылает новость (например, об отключении воды) всем
+ * известным чатам (личным и групповым), где кто-либо когда-либо писал боту.
+ * Список берём из lib/subscribers.ts, а не из GET /chats — этот метод API
+ * реально не существует на сервере MAX, см. комментарий в subscribers.ts.
  * Доступно только user_id из ADMIN_USER_IDS (см. bot/.env.example).
  */
 export async function handleAnnounceCommand(ctx: FilteredContext<Context, 'message_created'>) {
@@ -21,16 +22,19 @@ export async function handleAnnounceCommand(ctx: FilteredContext<Context, 'messa
     return
   }
 
-  const chats = await getAllBotChats(ctx.api)
-  const targets = chats.filter((chat) => chat.type === 'chat')
+  const targets = getKnownChatIds()
+  if (targets.length === 0) {
+    await ctx.reply('Пока никто не писал боту — рассылать некому.')
+    return
+  }
 
   let sent = 0
-  for (const chat of targets) {
+  for (const chatId of targets) {
     try {
-      await ctx.api.sendMessageToChat(chat.chat_id, `📢 ${text}`)
+      await ctx.api.sendMessageToChat(chatId, `📢 ${text}`)
       sent += 1
     } catch (error) {
-      console.error(`[announce] не удалось отправить в чат ${chat.chat_id}`, error)
+      console.error(`[announce] не удалось отправить в чат ${chatId}`, error)
     }
   }
 
