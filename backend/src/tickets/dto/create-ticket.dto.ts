@@ -1,30 +1,36 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { RequestCategory } from '../entities/ticket.entity';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { TicketCategory } from '../entities/ticket.entity';
 
 export class CreateTicketDto {
-  @ApiProperty({ enum: RequestCategory, example: RequestCategory.LEAK })
-  @IsEnum(RequestCategory)
-  category: RequestCategory;
+  @ApiProperty({ example: 'Течёт потолок в ванной' })
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
+  @ApiProperty({ enum: TicketCategory, example: TicketCategory.PLUMBING })
+  @IsEnum(TicketCategory)
+  @IsNotEmpty()
+  category: TicketCategory;
 
   @ApiProperty({ example: 'Течёт потолок в ванной, вода с соседнего этажа' })
   @IsString()
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty({ example: 'ул. Тестовая, д. 1, кв. 12' })
+  @ApiProperty({ example: 'ул. Тестовая, д. 1' })
   @IsString()
   @IsNotEmpty()
   address: string;
 
-  @ApiProperty({ example: '+7 900 000-00-01' })
-  @IsString()
-  @IsNotEmpty()
-  phone: string;
+  @ApiPropertyOptional({ example: 12 })
+  @IsOptional()
+  @IsNumber()
+  apartment?: number;
 
-  @ApiPropertyOptional({ example: 'data:image/png;base64,...' })
+  @ApiPropertyOptional({ example: 'https://example.com/photo.jpg' })
   @IsString()
   @IsOptional()
-  photoDataUrl?: string;
+  photoUrl?: string;
 }
 

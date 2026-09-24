@@ -1,17 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
-export enum RequestCategory {
-  LEAK = 'leak',
-  ELEVATOR = 'elevator',
-  ELECTRICITY = 'electricity',
-  HEATING = 'heating',
-  OTHER = 'other',
+export enum TicketCategory {
+  PLUMBING = 'PLUMBING', // сантехника / протечка
+  ELECTRICS = 'ELECTRICS', // электрика / свет
+  ELEVATOR = 'ELEVATOR', // лифт
+  COMMON_AREA = 'COMMON_AREA', // подъезд / двор
+  OTHER = 'OTHER',
 }
 
-export enum RequestStatus {
-  REGISTERED = 'registered',
-  IN_PROGRESS = 'in_progress',
-  CLOSED = 'closed',
+export enum TicketStatus {
+  CREATED = 'CREATED', // зарегистрировано
+  IN_PROGRESS = 'IN_PROGRESS', // в работе у диспетчера/мастера
+  COMPLETED = 'COMPLETED', // выполнено, ждёт подтверждения
+  CLOSED = 'CLOSED', // закрыто
 }
 
 @Entity('tickets')
@@ -19,36 +28,54 @@ export class Ticket {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  title: string;
+
+  @Column({ type: 'text' })
+  description: string;
+
   @Column({
     type: 'enum',
-    enum: RequestCategory,
-    default: RequestCategory.OTHER,
+    enum: TicketCategory,
+    default: TicketCategory.OTHER,
   })
-  category: RequestCategory;
+  category: TicketCategory;
 
-  @Column('text')
-  description: string;
+  @Column({
+    type: 'enum',
+    enum: TicketStatus,
+    default: TicketStatus.CREATED,
+  })
+  status: TicketStatus;
 
   @Column()
   address: string;
 
-  @Column()
-  phone: string;
+  @Column({ nullable: true })
+  apartment: number;
 
-  @Column({ type: 'text', nullable: true })
-  photoDataUrl?: string;
+  @Column({ nullable: true })
+  photoUrl: string;
 
-  @Column({
-    type: 'enum',
-    enum: RequestStatus,
-    default: RequestStatus.REGISTERED,
-  })
-  status: RequestStatus;
+  // Нормативный дедлайн устранения — конкретный момент времени, а не число часов,
+  // чтобы фронт мог считать обратный отсчёт и подсвечивать просрочку напрямую.
+  @Column({ type: 'timestamptz' })
+  slaDeadline: Date;
 
-  @Column({ type: 'int', default: 24 })
-  resolutionHours: number;
+  // Счётчик «У меня так же» — снижает дублирование заявок по одному дому/проблеме.
+  @Column({ default: 0 })
+  upvotesCount: number;
+
+  @ManyToOne(() => User, (user) => user.tickets, { eager: true, onDelete: 'CASCADE' })
+  author: User;
+
+  @ManyToOne(() => User, { nullable: true, eager: true })
+  assignee: User | null;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updatedAt: Date;
 }
 

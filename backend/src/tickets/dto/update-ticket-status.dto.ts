@@ -1,0 +1,11 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsNotEmpty } from 'class-validator';
+import { TicketStatus } from '../entities/ticket.entity';
+
+export class UpdateTicketStatusDto {
+  @ApiProperty({ enum: TicketStatus, example: TicketStatus.IN_PROGRESS })
+  @IsEnum(TicketStatus)
+  @IsNotEmpty()
+  status: TicketStatus;
+}
+
