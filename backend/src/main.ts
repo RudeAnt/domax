@@ -15,6 +15,7 @@ async function bootstrap() {
     .setTitle('Дом.MAX API')
     .setDescription('API сервиса управления домом')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
