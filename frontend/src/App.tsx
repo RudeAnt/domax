@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useMaxBackButton } from './hooks/useMaxBackButton'
 import { AuthGate } from './lib/AuthGate'
+import { HomePage } from './pages/HomePage'
 import { NewRequestPage } from './pages/NewRequestPage'
 import { RequestDetailPage } from './pages/RequestDetailPage'
 import { RequestsListPage } from './pages/RequestsListPage'
@@ -13,7 +14,8 @@ export function App() {
     <div className="app-shell">
       <AuthGate>
         <Routes>
-          <Route path="/" element={<RequestsListPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/requests" element={<RequestsListPage />} />
           <Route path="/new" element={<NewRequestPage />} />
           <Route path="/requests/:id" element={<RequestDetailPage />} />
           <Route path="/dev/playground" element={<PlaygroundPage />} />
@@ -23,4 +25,3 @@ export function App() {
     </div>
   )
 }
-

@@ -1,15 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { requestsApi } from '../api/requestsApi'
 import { PageHeader } from '../components/PageHeader'
 import { SlaTimer } from '../components/SlaTimer'
 import { StatusBadge } from '../components/StatusBadge'
 import { CATEGORY_CONFIG } from '../data/slaConfig'
-import type { ServiceRequest } from '../types/request'
+import type { RequestStatus, ServiceRequest } from '../types/request'
+
+type TabId = 'new' | 'in_progress' | 'done'
+
+const TABS: { id: TabId; label: string; statuses: RequestStatus[] }[] = [
+  { id: 'new', label: 'Новые', statuses: ['CREATED'] },
+  { id: 'in_progress', label: 'В работе', statuses: ['IN_PROGRESS'] },
+  // В макете один таб «Завершенные» на оба финальных статуса — COMPLETED
+  // (ждёт подтверждения) и CLOSED (закрыта) — отдельного таба под них нет.
+  { id: 'done', label: 'Завершенные', statuses: ['COMPLETED', 'CLOSED'] },
+]
 
 export function RequestsListPage() {
   const [requests, setRequests] = useState<ServiceRequest[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<TabId>('new')
 
   useEffect(() => {
     let cancelled = false
@@ -26,10 +37,31 @@ export function RequestsListPage() {
     }
   }, [])
 
+  const activeStatuses = TABS.find((t) => t.id === activeTab)!.statuses
+  const filtered = useMemo(
+    () => requests?.filter((r) => activeStatuses.includes(r.status)) ?? null,
+    [requests, activeStatuses],
+  )
+
   return (
     <>
-      <PageHeader title="Мои заявки" />
+      <PageHeader title="Заявки" showBack />
       <main className="app-content stack">
+        <div className="tabs" role="tablist">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              className={['tab', activeTab === tab.id && 'tab--active'].filter(Boolean).join(' ')}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {error && (
           <div className="empty-state">
             <p>Не удалось загрузить заявки</p>
@@ -39,14 +71,22 @@ export function RequestsListPage() {
 
         {!error && requests === null && <p className="field-hint">Загрузка…</p>}
 
-        {!error && requests !== null && requests.length === 0 && (
+        {!error && filtered !== null && filtered.length === 0 && (
           <div className="empty-state">
-            <p>Заявок пока нет.</p>
-            <p className="field-hint">Нажмите «+», чтобы подать первую заявку в УК.</p>
+            <p>
+              {activeTab === 'new'
+                ? 'Новых заявок нет.'
+                : activeTab === 'in_progress'
+                  ? 'Заявок в работе нет.'
+                  : 'Завершённых заявок пока нет.'}
+            </p>
+            {activeTab === 'new' && (
+              <p className="field-hint">Нажмите «+», чтобы подать первую заявку в УК.</p>
+            )}
           </div>
         )}
 
-        {requests?.map((request) => (
+        {filtered?.map((request) => (
           <Link
             key={request.id}
             to={`/requests/${request.id}`}
@@ -73,4 +113,3 @@ export function RequestsListPage() {
     </>
   )
 }
-
