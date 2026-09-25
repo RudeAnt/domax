@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useMaxBackButton } from './hooks/useMaxBackButton'
 import { AuthGate } from './lib/AuthGate'
+import { BrandBar } from './components/BrandBar'
 import { NewRequestPage } from './pages/NewRequestPage'
 import { RequestDetailPage } from './pages/RequestDetailPage'
 import { RequestsListPage } from './pages/RequestsListPage'
@@ -11,6 +12,7 @@ export function App() {
 
   return (
     <div className="app-shell">
+      <BrandBar />
       <AuthGate>
         <Routes>
           <Route path="/" element={<RequestsListPage />} />
@@ -23,4 +25,3 @@ export function App() {
     </div>
   )
 }
-

@@ -47,6 +47,17 @@
   color: var(--color-danger);
 }
 
+/* --- Card с градиентной обводкой (фиолетовый → голубой) ---
+   Как карточка «Плановое отключение воды» в макетах — под будущие
+   объявления/новости. Приём с padding-box/border-box фоном, а не
+   border-image, чтобы rectRadius карточки остался круглым по всем углам. */
+.card--brand-outline {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+    var(--gradient-brand) border-box;
+}
+
 /* --- EmptyState: детали внутри .empty-state --- */
 .empty-state__title {
   font-weight: 600;
@@ -128,10 +139,3 @@
 }
 
 @keyframes sheet-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
