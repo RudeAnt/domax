@@ -1,8 +1,7 @@
 import type { ServiceRequest } from '../types/request'
 
 export function getDeadline(request: ServiceRequest): Date {
-  const created = new Date(request.createdAt).getTime()
-  return new Date(created + request.resolutionHours * 60 * 60 * 1000)
+  return new Date(request.slaDeadline)
 }
 
 export function getRemainingMs(request: ServiceRequest, now: Date = new Date()): number {
@@ -10,7 +9,7 @@ export function getRemainingMs(request: ServiceRequest, now: Date = new Date()):
 }
 
 export function isOverdue(request: ServiceRequest, now: Date = new Date()): boolean {
-  return request.status !== 'closed' && getRemainingMs(request, now) < 0
+  return request.status !== 'CLOSED' && getRemainingMs(request, now) < 0
 }
 
 export function formatDuration(ms: number): string {
@@ -27,3 +26,4 @@ export function formatDuration(ms: number): string {
 
   return parts.join(' ')
 }
+

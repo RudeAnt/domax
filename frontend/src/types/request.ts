@@ -1,29 +1,44 @@
 export type RequestCategory =
-  | 'leak'
-  | 'elevator'
-  | 'electricity'
-  | 'heating'
-  | 'other'
+  | 'PLUMBING'
+  | 'ELECTRICS'
+  | 'ELEVATOR'
+  | 'COMMON_AREA'
+  | 'OTHER'
 
-export type RequestStatus = 'registered' | 'in_progress' | 'closed'
+export type RequestStatus = 'CREATED' | 'IN_PROGRESS' | 'COMPLETED' | 'CLOSED'
+
+export interface AuthorInfo {
+  id: string
+  fullName: string
+  role: 'RESIDENT' | 'DISPATCHER'
+  address: string
+  apartment?: number
+}
 
 export interface ServiceRequest {
   id: string
+  title: string
   category: RequestCategory
   description: string
   address: string
-  phone: string
-  photoDataUrl?: string
+  apartment?: number
+  photoUrl?: string
   status: RequestStatus
+  /** ISO-дата нормативного дедлайна — приходит готовой с бэка, на фронте не пересчитывается */
+  slaDeadline: string
+  upvotesCount: number
+  author: AuthorInfo
+  assignee: AuthorInfo | null
   createdAt: string
-  /** Нормативный срок устранения в часах от createdAt — см. src/data/slaConfig.ts */
-  resolutionHours: number
+  updatedAt: string
 }
 
 export interface CreateRequestInput {
+  title: string
   category: RequestCategory
   description: string
   address: string
-  phone: string
-  photoDataUrl?: string
+  apartment?: number
+  photoUrl?: string
 }
+

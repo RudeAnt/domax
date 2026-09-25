@@ -4,7 +4,7 @@ import { requestsApi } from '../api/requestsApi'
 import { PageHeader } from '../components/PageHeader'
 import { SlaTimer } from '../components/SlaTimer'
 import { StatusBadge } from '../components/StatusBadge'
-import { SLA_CONFIG } from '../data/slaConfig'
+import { CATEGORY_CONFIG } from '../data/slaConfig'
 import type { ServiceRequest } from '../types/request'
 import { isOverdue } from '../utils/sla'
 
@@ -14,7 +14,7 @@ import { isOverdue } from '../utils/sla'
  * копирования, без реальной интеграции (она в Won't на этом MVP).
  */
 function buildEscalationTemplate(request: ServiceRequest): string {
-  const category = SLA_CONFIG.find((c) => c.id === request.category)?.label ?? request.category
+  const category = CATEGORY_CONFIG.find((c) => c.id === request.category)?.label ?? request.category
   return [
     'Обращение в жилищную инспекцию / ГИС ЖКХ',
     '',
@@ -78,7 +78,7 @@ export function RequestDetailPage() {
   }
 
   const overdue = isOverdue(request)
-  const categoryLabel = SLA_CONFIG.find((c) => c.id === request.category)?.label
+  const categoryLabel = CATEGORY_CONFIG.find((c) => c.id === request.category)?.label
 
   return (
     <>
@@ -96,9 +96,15 @@ export function RequestDetailPage() {
               <dd style={{ margin: 0 }}>{request.address}</dd>
             </div>
             <div>
-              <dt className="field-hint">Телефон</dt>
-              <dd style={{ margin: 0 }}>{request.phone}</dd>
+              <dt className="field-hint">Заявитель</dt>
+              <dd style={{ margin: 0 }}>{request.author.fullName}</dd>
             </div>
+            {request.assignee && (
+              <div>
+                <dt className="field-hint">Исполнитель</dt>
+                <dd style={{ margin: 0 }}>{request.assignee.fullName}</dd>
+              </div>
+            )}
             <div>
               <dt className="field-hint">Подана</dt>
               <dd style={{ margin: 0 }}>
@@ -106,9 +112,9 @@ export function RequestDetailPage() {
               </dd>
             </div>
           </dl>
-          {request.photoDataUrl && (
+          {request.photoUrl && (
             <img
-              src={request.photoDataUrl}
+              src={request.photoUrl}
               alt="Фото к заявке"
               style={{ maxWidth: '100%', borderRadius: 'var(--radius-md)' }}
             />
@@ -143,3 +149,4 @@ export function RequestDetailPage() {
     </>
   )
 }
+

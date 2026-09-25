@@ -1,9 +1,10 @@
 import type { RequestStatus } from '../types/request'
 
 const STATUS_LABEL: Record<RequestStatus, string> = {
-  registered: 'Зарегистрирована',
-  in_progress: 'В работе',
-  closed: 'Закрыта',
+  CREATED: 'Зарегистрирована',
+  IN_PROGRESS: 'В работе',
+  COMPLETED: 'Выполнено',
+  CLOSED: 'Закрыта',
 }
 
 export function StatusBadge({ status }: { status: RequestStatus }) {
@@ -19,3 +20,4 @@ export function StatusBadge({ status }: { status: RequestStatus }) {
     </span>
   )
 }
+

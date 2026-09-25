@@ -9,20 +9,21 @@ import type { RequestCategory } from '../types/request'
  * когда там появится реальная классификация.
  */
 const KEYWORDS: Record<RequestCategory, string[]> = {
-  leak: ['течь', 'протеч', 'залив', 'капает', 'вода с потолка', 'труба'],
-  elevator: ['лифт', 'застрял', 'кабина'],
-  electricity: ['свет', 'электрич', 'проводк', 'розетк', 'щиток', 'искр'],
-  heating: ['отоплен', 'батаре', 'радиатор', 'холодно', 'не топят'],
-  other: [],
+  PLUMBING: ['течь', 'протеч', 'залив', 'капает', 'вода с потолка', 'труба'],
+  ELEVATOR: ['лифт', 'застрял', 'кабина'],
+  ELECTRICS: ['свет', 'электрич', 'проводк', 'розетк', 'щиток', 'искр'],
+  COMMON_AREA: ['подъезд', 'двор', 'домофон', 'мусор', 'лестниц'],
+  OTHER: [],
 }
 
 export function classifyCategory(description: string): RequestCategory {
   const text = description.toLowerCase()
   for (const category of Object.keys(KEYWORDS) as RequestCategory[]) {
-    if (category === 'other') continue
+    if (category === 'OTHER') continue
     if (KEYWORDS[category].some((keyword) => text.includes(keyword))) {
       return category
     }
   }
-  return 'other'
+  return 'OTHER'
 }
+

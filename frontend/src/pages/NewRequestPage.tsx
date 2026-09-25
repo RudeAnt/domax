@@ -10,11 +10,10 @@ import type { RequestCategory } from '../types/request'
 export function NewRequestPage() {
   const navigate = useNavigate()
   const [description, setDescription] = useState('')
-  const [category, setCategory] = useState<RequestCategory>('other')
+  const [category, setCategory] = useState<RequestCategory>('OTHER')
   const [categoryTouched, setCategoryTouched] = useState(false)
   const [address, setAddress] = useState('')
-  const [phone, setPhone] = useState('')
-  const [photoDataUrl, setPhotoDataUrl] = useState<string | undefined>()
+  const [photoUrl, setPhotoUrl] = useState<string | undefined>()
   const [submitting, setSubmitting] = useState(false)
 
   const suggested = useMemo(() => classifyCategory(description), [description])
@@ -26,19 +25,20 @@ export function NewRequestPage() {
     }
   }
 
-  const isValid = description.trim().length > 0 && address.trim().length > 0 && phone.trim().length > 0
+  const isValid = description.trim().length > 0 && address.trim().length > 0
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!isValid || submitting) return
     setSubmitting(true)
     try {
+      const title = description.trim().slice(0, 60)
       const created = await requestsApi.create({
+        title,
         category,
         description: description.trim(),
         address: address.trim(),
-        phone: phone.trim(),
-        photoDataUrl,
+        photoUrl,
       })
       navigate(`/requests/${created.id}`, { replace: true })
     } finally {
@@ -87,19 +87,7 @@ export function NewRequestPage() {
             </p>
           </div>
 
-          <div className="field">
-            <label htmlFor="phone">Телефон для связи</label>
-            <input
-              id="phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+7 900 000-00-00"
-              required
-            />
-          </div>
-
-          <PhotoUpload value={photoDataUrl} onChange={setPhotoDataUrl} />
+          <PhotoUpload value={photoUrl} onChange={setPhotoUrl} />
 
           <button type="submit" className="btn btn-primary" disabled={!isValid || submitting}>
             {submitting ? 'Отправка…' : 'Оформить заявку'}
@@ -109,3 +97,4 @@ export function NewRequestPage() {
     </>
   )
 }
+

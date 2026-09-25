@@ -1,4 +1,4 @@
-import { SLA_CONFIG } from '../data/slaConfig'
+import { CATEGORY_CONFIG } from '../data/slaConfig'
 import type { RequestCategory } from '../types/request'
 
 interface CategoryPickerProps {
@@ -16,7 +16,7 @@ export function CategoryPicker({ value, onChange, suggested }: CategoryPickerPro
         value={value}
         onChange={(e) => onChange(e.target.value as RequestCategory)}
       >
-        {SLA_CONFIG.map((option) => (
+        {CATEGORY_CONFIG.map((option) => (
           <option key={option.id} value={option.id}>
             {option.label}
           </option>
@@ -24,10 +24,11 @@ export function CategoryPicker({ value, onChange, suggested }: CategoryPickerPro
       </select>
       {suggested && suggested !== value && (
         <p className="field-hint">
-          По описанию похоже на «{SLA_CONFIG.find((c) => c.id === suggested)?.label}» —
+          По описанию похоже на «{CATEGORY_CONFIG.find((c) => c.id === suggested)?.label}» —
           можно переключить категорию выше.
         </p>
       )}
     </div>
   )
 }
+

@@ -1,130 +1,70 @@
-import { getSlaConfig } from '../data/slaConfig'
 import type { CreateRequestInput, ServiceRequest } from '../types/request'
+import { getToken } from '../lib/auth'
 
 export interface RequestsApi {
   list(): Promise<ServiceRequest[]>
   get(id: string): Promise<ServiceRequest | undefined>
   create(input: CreateRequestInput): Promise<ServiceRequest>
+  upvote(id: string): Promise<ServiceRequest>
 }
 
-const STORAGE_KEY = 'domax.requests.v1'
-const SIMULATED_LATENCY_MS = 300
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
-function readFromStorage(): ServiceRequest[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as ServiceRequest[]) : seedRequests()
-  } catch {
-    return seedRequests()
+function authHeaders(): HeadersInit {
+  const token = getToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+// Бросает с понятным сообщением вместо того, чтобы дальше по цепочке
+// упасть на .map() над объектом ошибки — так вызывающий код может
+// показать пользователю осмысленное состояние вместо краша страницы.
+async function parseOrThrow<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    let message = `Ошибка запроса: ${res.status}`
+    try {
+      const body = await res.json()
+      if (body?.message) message = Array.isArray(body.message) ? body.message.join(', ') : body.message
+    } catch {
+      // тело не JSON — оставляем дефолтное сообщение
+    }
+    throw new Error(message)
   }
+  return res.json()
 }
 
-function writeToStorage(requests: ServiceRequest[]): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(requests))
-  } catch {
-    // localStorage недоступен (приватный режим и т.п.) — тихо игнорируем,
-    // это моковый слой для локальной разработки, не боевое хранилище.
-  }
-}
-
-function seedRequests(): ServiceRequest[] {
-  const now = Date.now()
-  const seed: ServiceRequest[] = [
-    {
-      id: 'seed-1',
-      category: 'leak',
-      description: 'Течёт потолок в ванной, вода с соседнего этажа',
-      address: 'ул. Тестовая, д. 1, кв. 12',
-      phone: '+7 900 000-00-01',
-      status: 'in_progress',
-      createdAt: new Date(now - 20 * 60 * 60 * 1000).toISOString(),
-      resolutionHours: getSlaConfig('leak').resolutionHours,
-    },
-    {
-      id: 'seed-2',
-      category: 'elevator',
-      description: 'Лифт не приезжает на 5 этаж третий день',
-      address: 'ул. Тестовая, д. 1, кв. 45',
-      phone: '+7 900 000-00-02',
-      status: 'registered',
-      createdAt: new Date(now - 30 * 60 * 60 * 1000).toISOString(),
-      resolutionHours: getSlaConfig('elevator').resolutionHours,
-    },
-    {
-      id: 'seed-3',
-      category: 'heating',
-      description: 'Холодные батареи в квартире, отопление не работает',
-      address: 'ул. Тестовая, д. 2, кв. 3',
-      phone: '+7 900 000-00-03',
-      status: 'closed',
-      createdAt: new Date(now - 48 * 60 * 60 * 1000).toISOString(),
-      resolutionHours: getSlaConfig('heating').resolutionHours,
-    },
-  ]
-  writeToStorage(seed)
-  return seed
-}
-
-function delay<T>(value: T): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(value), SIMULATED_LATENCY_MS))
-}
-
-// Немоковая реализация
 class HttpRequestsApi implements RequestsApi {
   async list(): Promise<ServiceRequest[]> {
-    const res = await fetch(`${BASE_URL}/tickets`);
-    return res.json();
+    const res = await fetch(`${BASE_URL}/tickets`, {
+      headers: { ...authHeaders() },
+    })
+    return parseOrThrow<ServiceRequest[]>(res)
   }
 
   async get(id: string): Promise<ServiceRequest | undefined> {
-    const res = await fetch(`${BASE_URL}/tickets/${id}`);
-    if (!res.ok) return undefined;
-    return res.json();
+    const res = await fetch(`${BASE_URL}/tickets/${id}`, {
+      headers: { ...authHeaders() },
+    })
+    if (res.status === 404) return undefined
+    return parseOrThrow<ServiceRequest>(res)
   }
 
   async create(input: CreateRequestInput): Promise<ServiceRequest> {
     const res = await fetch(`${BASE_URL}/tickets`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify(input),
-    });
-    return res.json();
+    })
+    return parseOrThrow<ServiceRequest>(res)
+  }
+
+  async upvote(id: string): Promise<ServiceRequest> {
+    const res = await fetch(`${BASE_URL}/tickets/${id}/upvote`, {
+      method: 'POST',
+      headers: { ...authHeaders() },
+    })
+    return parseOrThrow<ServiceRequest>(res)
   }
 }
 
-/**
- * Моковая реализация: хранит заявки в localStorage браузера, ничего не
- * отправляет на бэкенд. Позволяет фронту работать независимо от того,
- * готовы ли эндпоинты в backend/. Когда бэкенд будет готов — реализовать
- * HttpRequestsApi по этому же интерфейсу и поменять экспорт ниже на него,
- * остальной код приложения трогать не придётся.
- */
-class MockRequestsApi implements RequestsApi {
-  async list(): Promise<ServiceRequest[]> {
-    const requests = readFromStorage()
-    return delay([...requests].sort((a, b) => b.createdAt.localeCompare(a.createdAt)))
-  }
-
-  async get(id: string): Promise<ServiceRequest | undefined> {
-    const requests = readFromStorage()
-    return delay(requests.find((r) => r.id === id))
-  }
-
-  async create(input: CreateRequestInput): Promise<ServiceRequest> {
-    const requests = readFromStorage()
-    const request: ServiceRequest = {
-      ...input,
-      id: crypto.randomUUID(),
-      status: 'registered',
-      createdAt: new Date().toISOString(),
-      resolutionHours: getSlaConfig(input.category).resolutionHours,
-    }
-    writeToStorage([request, ...requests])
-    return delay(request)
-  }
-}
-
-export const requestsApi: RequestsApi = new HttpRequestsApi();
+export const requestsApi: RequestsApi = new HttpRequestsApi()
 

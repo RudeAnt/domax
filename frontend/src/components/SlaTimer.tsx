@@ -6,12 +6,12 @@ export function SlaTimer({ request }: { request: ServiceRequest }) {
   const [now, setNow] = useState(() => new Date())
 
   useEffect(() => {
-    if (request.status === 'closed') return
+    if (request.status === 'CLOSED') return
     const interval = setInterval(() => setNow(new Date()), 60_000)
     return () => clearInterval(interval)
   }, [request.status])
 
-  if (request.status === 'closed') {
+  if (request.status === 'CLOSED') {
     return <span className="field-hint">Заявка закрыта</span>
   }
 
@@ -32,3 +32,4 @@ export function SlaTimer({ request }: { request: ServiceRequest }) {
     </span>
   )
 }
+
