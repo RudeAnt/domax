@@ -183,6 +183,10 @@ a {
   color: var(--color-primary-contrast);
   font-size: 28px;
   line-height: 1;
+  text-decoration: none;
+  display: flex;            
+  align-items: center;       
+  justify-content: center; 
   box-shadow: var(--shadow-md);
   cursor: pointer;
 }

@@ -47,6 +47,47 @@
   color: var(--color-danger);
 }
 
+/* --- Tabs (Новые / В работе / Завершенные) — как в макете заявки новые.png --- */
+.tabs {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+}
+
+.tab {
+  flex: 0 0 auto;
+  appearance: none; -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: var(--color-bg);
+}
+
+.tab--active {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+/* --- Card с градиентной обводкой (фиолетовый → голубой) ---
+   Как карточка «Плановое отключение воды» в макетах — под будущие
+   объявления/новости. Приём с padding-box/border-box фоном, а не
+   border-image, чтобы rectRadius карточки остался круглым по всем углам. */
+.card--brand-outline {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+    var(--gradient-brand) border-box;
+}
+
 /* --- EmptyState: детали внутри .empty-state --- */
 .empty-state__title {
   font-weight: 600;

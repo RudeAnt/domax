@@ -1,18 +1,20 @@
 /*
-  Дизайн-токены — временная нейтральная тема.
-  Дизайнер ещё не прислал макет, поэтому вся визуальная часть держится
-  в переменных здесь и в компонентах читается только через них.
-  Когда придёт дизайн — меняем значения в этом файле (и точечно классы
-  там, где реальный макет предполагает другую форму компонента),
-  вместо переписывания разметки.
+  Дизайн-токены — палитра ДОМАКС (бывш. Дом.MAX), снята пипеткой с
+  экспорта макетов Figma (главная.png, заявки новые.png и т.д.):
+  тёмная почти чёрная шапка/поверхности (#0D0016 / #210C46) и
+  фиолетово-голубой градиентный акцент (#A62DFF → #2EC5FF) для
+  выделенных карточек и плавающих кнопок. Точечно поправить значения,
+  если дизайнер уточнит точные hex — переменные держат всю тему в одном
+  месте, компоненты их не хардкодят.
 */
 :root {
+  color-scheme: light dark;
   --color-bg: #f5f6f8;
   --color-surface: #ffffff;
   --color-border: #e2e4e9;
   --color-text: #1a1d24;
   --color-text-muted: #6b7280;
-  --color-primary: #4f46e5;
+  --color-primary: #8b2fff;
   --color-primary-contrast: #ffffff;
   --color-danger: #dc2626;
   --color-danger-bg: #fef2f2;
@@ -21,12 +23,24 @@
   --color-success: #16a34a;
   --color-success-bg: #f0fdf4;
 
-  --status-registered-bg: #eef2ff;
-  --status-registered-text: #4338ca;
-  --status-in_progress-bg: #fffbeb;
-  --status-in_progress-text: #b45309;
-  --status-closed-bg: #f0fdf4;
-  --status-closed-text: #15803d;
+  /* Брендовые токены ДОМАКС — тёмная шапка/поверхности + градиент */
+  --color-brand-dark: #0d0016;
+  --color-brand-surface: #210c46;
+  --color-brand-accent-a: #a62dff;
+  --color-brand-accent-b: #2ec5ff;
+  --gradient-brand: linear-gradient(135deg, var(--color-brand-accent-a) 0%, var(--color-brand-accent-b) 100%);
+
+  /* Имена статусов заглавные, вслед за TicketStatus на бэке
+     (CREATED/IN_PROGRESS/COMPLETED/CLOSED) — StatusBadge подставляет их
+     в var(--status-${status}-bg) напрямую, регистр должен совпадать. */
+  --status-CREATED-bg: #eef2ff;
+  --status-CREATED-text: #4338ca;
+  --status-IN_PROGRESS-bg: #fffbeb;
+  --status-IN_PROGRESS-text: #b45309;
+  --status-COMPLETED-bg: #ecfdf5;
+  --status-COMPLETED-text: #047857;
+  --status-CLOSED-bg: #f0fdf4;
+  --status-CLOSED-text: #15803d;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -51,7 +65,7 @@
     --color-border: #2c2f38;
     --color-text: #f1f2f4;
     --color-text-muted: #9aa0ab;
-    --color-primary: #818cf8;
+    --color-primary: #a56bff;
     --color-primary-contrast: #121317;
     --color-danger: #f87171;
     --color-danger-bg: #2a1414;
@@ -60,11 +74,13 @@
     --color-success: #4ade80;
     --color-success-bg: #12271a;
 
-    --status-registered-bg: #1e2140;
-    --status-registered-text: #a5b4fc;
-    --status-in_progress-bg: #2a2110;
-    --status-in_progress-text: #fbbf24;
-    --status-closed-bg: #12271a;
-    --status-closed-text: #4ade80;
+    --status-CREATED-bg: #1e2140;
+    --status-CREATED-text: #a5b4fc;
+    --status-IN_PROGRESS-bg: #2a2110;
+    --status-IN_PROGRESS-text: #fbbf24;
+    --status-COMPLETED-bg: #103326;
+    --status-COMPLETED-text: #34d399;
+    --status-CLOSED-bg: #12271a;
+    --status-CLOSED-text: #4ade80;
   }
 }
