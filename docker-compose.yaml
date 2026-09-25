@@ -26,6 +26,8 @@ services:
       DATABASE_USER: postgres
       DATABASE_PASSWORD: rootpassword
       DATABASE_NAME: domax
+      JWT_SECRET: ${JWT_SECRET}
+      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN}
     ports:
       - "3000:3000"
     volumes:
