@@ -56,8 +56,14 @@ export class Ticket {
 
   @Column({ nullable: true })
   photoUrl: string;
+  
+  @Column({ nullable: true })
+  entrance: number;
 
-  // Нормативный дедлайн устранения — конкретный момент времени, а не число часов,
+  @Column({ nullable: true })
+  floor: number;
+  
+// Нормативный дедлайн устранения — конкретный момент времени, а не число часов,
   // чтобы фронт мог считать обратный отсчёт и подсвечивать просрочку напрямую.
   @Column({ type: 'timestamptz' })
   slaDeadline: Date;
@@ -77,5 +83,6 @@ export class Ticket {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
+ 
 }
 

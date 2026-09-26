@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ticket, TicketCategory, TicketStatus } from './entities/ticket.entity';
@@ -79,6 +79,19 @@ export class TicketsService {
     const ticket = await this.findOne(id);
     ticket.upvotesCount += 1;
     return this.repo.save(ticket);
+  }
+
+  async remove(id: string, requester: User): Promise<void> {
+    const ticket = await this.findOne(id);
+
+    if (ticket.author.id !== requester.id) {
+      throw new ForbiddenException('Удалить заявку может только её автор');
+    }
+    if (ticket.status !== TicketStatus.CREATED) {
+      throw new ForbiddenException('Нельзя удалить заявку, которая уже взята в работу или закрыта');
+    }
+
+    await this.repo.remove(ticket);
   }
 }
 

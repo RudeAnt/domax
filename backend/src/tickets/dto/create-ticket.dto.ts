@@ -32,5 +32,15 @@ export class CreateTicketDto {
   @IsString()
   @IsOptional()
   photoUrl?: string;
+
+  @ApiPropertyOptional({ example: 2 })
+  @IsOptional()
+  @IsNumber()
+  entrance?: number;
+
+  @ApiPropertyOptional({ example: 3 })
+  @IsOptional()
+  @IsNumber()
+  floor?: number;
 }
 

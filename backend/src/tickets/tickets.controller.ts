@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
@@ -53,6 +53,14 @@ export class TicketsController {
   @ApiOperation({ summary: '«У меня так же» — отметить дублирующуюся проблему' })
   upvote(@Param('id') id: string) {
     return this.service.upvote(id);
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.RESIDENT)
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Удалить свою заявку (только пока статус CREATED)' })
+  remove(@Param('id') id: string, @CurrentUser() user: User) {
+    return this.service.remove(id, user);
   }
 }
 
