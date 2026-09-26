@@ -9,10 +9,12 @@ import type { RequestCategory } from '../types/request'
 
 export function NewRequestPage() {
   const navigate = useNavigate()
+  const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<RequestCategory>('OTHER')
   const [categoryTouched, setCategoryTouched] = useState(false)
-  const [address, setAddress] = useState('')
+  const [entrance, setEntrance] = useState('')
+  const [floor, setFloor] = useState('')
   const [photoUrl, setPhotoUrl] = useState<string | undefined>()
   const [submitting, setSubmitting] = useState(false)
 
@@ -25,19 +27,19 @@ export function NewRequestPage() {
     }
   }
 
-  const isValid = description.trim().length > 0 && address.trim().length > 0
+  const isValid = title.trim().length > 0 && description.trim().length > 0
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!isValid || submitting) return
     setSubmitting(true)
     try {
-      const title = description.trim().slice(0, 60)
       const created = await requestsApi.create({
-        title,
+        title: title.trim(),
         category,
         description: description.trim(),
-        address: address.trim(),
+        entrance: entrance ? Number(entrance) : undefined,
+        floor: floor ? Number(floor) : undefined,
         photoUrl,
       })
       navigate(`/requests/${created.id}`, { replace: true })
@@ -52,13 +54,24 @@ export function NewRequestPage() {
       <main className="app-content">
         <form className="stack" onSubmit={handleSubmit}>
           <div className="field">
-            <label htmlFor="description">Опишите проблему</label>
+            <label htmlFor="title">Тема заявки</label>
+            <input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Например: течёт потолок в ванной"
+              required
+            />
+          </div>
+
+          <div className="field">
+            <label htmlFor="description">Подробное описание</label>
             <textarea
               id="description"
               rows={4}
               value={description}
               onChange={(e) => handleDescriptionChange(e.target.value)}
-              placeholder="Например: течёт потолок в ванной"
+              placeholder="Опишите проблему подробнее — это поможет мастеру подготовиться заранее"
               required
             />
           </div>
@@ -73,17 +86,30 @@ export function NewRequestPage() {
           />
 
           <div className="field">
-            <label htmlFor="address">Адрес</label>
-            <input
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Улица, дом, квартира"
-              required
-            />
+            <label id="place-label">Место проблемы</label>
+            <div style={{ display: 'flex', gap: 'var(--space-3)' }} role="group" aria-labelledby="place-label">
+              <input
+                type="number"
+                min={1}
+                inputMode="numeric"
+                value={entrance}
+                onChange={(e) => setEntrance(e.target.value)}
+                placeholder="Подъезд №"
+                aria-label="Подъезд"
+                style={{ flex: 1 }}
+              />
+              <input
+                type="number"
+                inputMode="numeric"
+                value={floor}
+                onChange={(e) => setFloor(e.target.value)}
+                placeholder="Этаж"
+                aria-label="Этаж"
+                style={{ flex: 1 }}
+              />
+            </div>
             <p className="field-hint">
-              Тестовые данные вместо ФИАС/ГИС ЖКХ — интеграция с реальным справочником
-              адресов запланирована отдельным слоем (см. стратегию, раздел 7).
+              Адрес дома берётся из вашего профиля — здесь достаточно уточнить подъезд и этаж.
             </p>
           </div>
 
@@ -97,4 +123,3 @@ export function NewRequestPage() {
     </>
   )
 }
-

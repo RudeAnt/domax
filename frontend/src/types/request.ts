@@ -20,7 +20,9 @@ export interface ServiceRequest {
   title: string
   category: RequestCategory
   description: string
-  address: string
+  /** Подъезд и этаж — где именно проблема, отдельно от адреса дома автора. */
+  entrance?: number
+  floor?: number
   apartment?: number
   photoUrl?: string
   status: RequestStatus
@@ -37,8 +39,8 @@ export interface CreateRequestInput {
   title: string
   category: RequestCategory
   description: string
-  address: string
+  entrance?: number
+  floor?: number
   apartment?: number
   photoUrl?: string
 }
-

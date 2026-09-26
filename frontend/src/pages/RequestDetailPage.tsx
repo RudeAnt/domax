@@ -19,7 +19,7 @@ function buildEscalationTemplate(request: ServiceRequest): string {
     'Обращение в жилищную инспекцию / ГИС ЖКХ',
     '',
     `Категория: ${category}`,
-    `Адрес: ${request.address}`,
+    `Адрес: ${request.author.address}`,
     `Описание проблемы: ${request.description}`,
     `Заявка подана: ${new Date(request.createdAt).toLocaleString('ru-RU')}`,
     'Нормативный срок устранения нарушен, ответ от управляющей организации отсутствует.',
@@ -93,8 +93,18 @@ export function RequestDetailPage() {
           <dl style={{ margin: 0, display: 'grid', gap: 4 }}>
             <div>
               <dt className="field-hint">Адрес</dt>
-              <dd style={{ margin: 0 }}>{request.address}</dd>
+              <dd style={{ margin: 0 }}>{request.author.address}</dd>
             </div>
+            {(request.entrance || request.floor) && (
+              <div>
+                <dt className="field-hint">Место проблемы</dt>
+                <dd style={{ margin: 0 }}>
+                  {request.entrance ? `Подъезд №${request.entrance}` : null}
+                  {request.entrance && request.floor ? ', ' : null}
+                  {request.floor ? `${request.floor} этаж` : null}
+                </dd>
+              </div>
+            )}
             <div>
               <dt className="field-hint">Заявитель</dt>
               <dd style={{ margin: 0 }}>{request.author.fullName}</dd>
@@ -149,4 +159,3 @@ export function RequestDetailPage() {
     </>
   )
 }
-
