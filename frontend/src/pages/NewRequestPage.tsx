@@ -1,5 +1,6 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getMyProfile } from '../api/usersApi'
 import { requestsApi } from '../api/requestsApi'
 import { CategoryPicker } from '../components/CategoryPicker'
 import { PageHeader } from '../components/PageHeader'
@@ -17,6 +18,24 @@ export function NewRequestPage() {
   const [floor, setFloor] = useState('')
   const [photoUrl, setPhotoUrl] = useState<string | undefined>()
   const [submitting, setSubmitting] = useState(false)
+  const [address, setAddress] = useState<string | null>(null)
+  const [addressError, setAddressError] = useState(false)
+
+  // Бэкенд требует адрес при создании заявки (CreateTicketDto.address) —
+  // подтягиваем его из профиля автоматически, пользователь его не вводит.
+  useEffect(() => {
+    let cancelled = false
+    getMyProfile()
+      .then((profile) => {
+        if (!cancelled) setAddress(profile.address)
+      })
+      .catch(() => {
+        if (!cancelled) setAddressError(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const suggested = useMemo(() => classifyCategory(description), [description])
 
@@ -27,16 +46,17 @@ export function NewRequestPage() {
     }
   }
 
-  const isValid = title.trim().length > 0 && description.trim().length > 0
+  const isValid = title.trim().length > 0 && description.trim().length > 0 && !!address
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!isValid || submitting) return
+    if (!isValid || submitting || !address) return
     setSubmitting(true)
     try {
       const created = await requestsApi.create({
         title: title.trim(),
         category,
+        address,
         description: description.trim(),
         entrance: entrance ? Number(entrance) : undefined,
         floor: floor ? Number(floor) : undefined,
@@ -84,6 +104,18 @@ export function NewRequestPage() {
               setCategoryTouched(true)
             }}
           />
+
+          <div className="field">
+            <label>Адрес</label>
+            {address && <p style={{ margin: 0 }}>{address}</p>}
+            {!address && !addressError && <p className="field-hint">Загрузка адреса из профиля…</p>}
+            {addressError && (
+              <p className="field-hint" style={{ color: 'var(--color-danger)' }}>
+                Не удалось загрузить адрес из профиля — оформить заявку пока нельзя, попробуйте
+                обновить страницу.
+              </p>
+            )}
+          </div>
 
           <div className="field">
             <label id="place-label">Место проблемы</label>

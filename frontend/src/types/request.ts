@@ -38,6 +38,8 @@ export interface ServiceRequest {
 export interface CreateRequestInput {
   title: string
   category: RequestCategory
+  /** Бэкенд требует адрес обязательным полем — берём из профиля автора, см. NewRequestPage. */
+  address: string
   description: string
   entrance?: number
   floor?: number
