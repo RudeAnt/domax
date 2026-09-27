@@ -1,4 +1,4 @@
-import type { CreateRequestInput, ServiceRequest } from '../types/request'
+import type { CreateRequestInput, RequestStatus, ServiceRequest } from '../types/request'
 import { getToken } from '../lib/auth'
 
 export interface RequestsApi {
@@ -6,6 +6,8 @@ export interface RequestsApi {
   get(id: string): Promise<ServiceRequest | undefined>
   create(input: CreateRequestInput): Promise<ServiceRequest>
   upvote(id: string): Promise<ServiceRequest>
+  /** PATCH /tickets/:id/status — доступно только роли DISPATCHER на бэкенде. */
+  updateStatus(id: string, status: RequestStatus): Promise<ServiceRequest>
 }
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
@@ -61,6 +63,15 @@ class HttpRequestsApi implements RequestsApi {
     const res = await fetch(`${BASE_URL}/tickets/${id}/upvote`, {
       method: 'POST',
       headers: { ...authHeaders() },
+    })
+    return parseOrThrow<ServiceRequest>(res)
+  }
+
+  async updateStatus(id: string, status: RequestStatus): Promise<ServiceRequest> {
+    const res = await fetch(`${BASE_URL}/tickets/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ status }),
     })
     return parseOrThrow<ServiceRequest>(res)
   }
