@@ -32,12 +32,21 @@ export function DispatcherPage() {
   useEffect(() => {
     let cancelled = false
     getMyProfile()
-      .then((profile) => !cancelled && setRole(profile.role))
-      .catch(() => !cancelled && setError('Не удалось проверить роль пользователя'))
-    requestsApi
-      .list()
-      .then((data) => !cancelled && setRequests(data))
-      .catch((e) => !cancelled && setError(e instanceof Error ? e.message : 'Не удалось загрузить заявки'))
+      .then((profile) => {
+        if (cancelled) return
+        setRole(profile.role)
+        // Заявки по всем домам — чувствительные данные (ФИО, адреса), поэтому
+        // грузим их только ПОСЛЕ подтверждения роли DISPATCHER, а не параллельно
+        // с проверкой роли: иначе список на мгновение отрисуется для любого
+        // пользователя, пока role ещё null (см. рендер ниже).
+        if (profile.role !== 'DISPATCHER') return
+        return requestsApi.list()
+      })
+      .then((data) => !cancelled && data && setRequests(data))
+      .catch((e) =>
+        !cancelled &&
+        setError(e instanceof Error ? e.message : 'Не удалось проверить роль пользователя или загрузить заявки'),
+      )
     return () => {
       cancelled = true
     }
@@ -57,15 +66,24 @@ export function DispatcherPage() {
     }
   }
 
-  if (role && role !== 'DISPATCHER') {
+  if (role !== 'DISPATCHER') {
     return (
       <>
         <PageHeader title="Панель администратора" showBack />
         <main className="app-content">
-          <EmptyState
-            title="Доступно только диспетчерам"
-            description="Эта панель предназначена для сотрудников управляющей компании."
-          />
+          {role === null && !error && <p className="field-hint">Проверяем доступ…</p>}
+          {role === null && error && (
+            <div className="empty-state">
+              <p>Не удалось проверить доступ</p>
+              <p className="field-hint">{error}</p>
+            </div>
+          )}
+          {role !== null && (
+            <EmptyState
+              title="Доступно только диспетчерам"
+              description="Эта панель предназначена для сотрудников управляющей компании."
+            />
+          )}
         </main>
       </>
     )

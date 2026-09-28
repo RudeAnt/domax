@@ -40,7 +40,7 @@ export function App() {
           <Route path="/new" element={<NewRequestPage />} />
           <Route path="/requests/:id" element={<RequestDetailPage />} />
           <Route path="/dispatcher" element={<DispatcherPage />} />
-          <Route path="/dev/playground" element={<PlaygroundPage />} />
+          {import.meta.env.DEV && <Route path="/dev/playground" element={<PlaygroundPage />} />}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthGate>
