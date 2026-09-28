@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { devLogin, getToken } from './auth'
+import { devLogin, getRole, getToken } from './auth'
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(() => !!getToken())
@@ -7,7 +7,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (ready) return
-    devLogin('RESIDENT')
+    devLogin(getRole())
       .then(() => setReady(true))
       .catch((e) => setError(e instanceof Error ? e.message : 'Не удалось авторизоваться'))
   }, [ready])

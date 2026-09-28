@@ -1,4 +1,5 @@
 const TOKEN_KEY = 'domax.accessToken'
+const ROLE_KEY = 'domax.role'
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 export type UserRole = 'RESIDENT' | 'DISPATCHER'
@@ -13,6 +14,20 @@ export function setToken(token: string): void {
 
 export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY)
+}
+
+/**
+ * Роль для входа через dev-login — переключается на служебной странице
+ * /dev/role (см. pages/DevRolePage.tsx), только для демонстрации жюри.
+ * Реальный вход через MAX initData роль не выбирает — она приходит
+ * с бэка из профиля пользователя.
+ */
+export function getRole(): UserRole {
+  return localStorage.getItem(ROLE_KEY) === 'DISPATCHER' ? 'DISPATCHER' : 'RESIDENT'
+}
+
+export function setRole(role: UserRole): void {
+  localStorage.setItem(ROLE_KEY, role)
 }
 
 /**
