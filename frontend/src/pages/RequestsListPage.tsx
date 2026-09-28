@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { requestsApi } from '../api/requestsApi'
+import { getMyProfile } from '../api/usersApi'
 import { PageHeader } from '../components/PageHeader'
 import { SlaTimer } from '../components/SlaTimer'
 import { StatusBadge } from '../components/StatusBadge'
@@ -24,14 +25,21 @@ export function RequestsListPage() {
 
   useEffect(() => {
     let cancelled = false
-    requestsApi
-      .list()
-      .then((data) => {
-        if (!cancelled) setRequests(data)
-      })
-      .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Не удалось загрузить заявки')
-      })
+    // Фильтруем по адресу дома жителя (см. HomePage) — если профиль не
+    // загрузился, показываем нефильтрованный список вместо пустого экрана.
+    getMyProfile()
+      .then((profile) => profile.address)
+      .catch(() => undefined)
+      .then((address) =>
+        requestsApi
+          .list(address)
+          .then((data) => {
+            if (!cancelled) setRequests(data)
+          })
+          .catch((e) => {
+            if (!cancelled) setError(e instanceof Error ? e.message : 'Не удалось загрузить заявки')
+          }),
+      )
     return () => {
       cancelled = true
     }

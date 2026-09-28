@@ -20,14 +20,29 @@ export function HomePage() {
 
   useEffect(() => {
     let cancelled = false
+
+    // Заявки грузим только ПОСЛЕ профиля, чтобы отфильтровать список по
+    // адресу дома жителя (иначе на главной видно заявки всех домов сразу).
+    // Если профиль не загрузился — показываем нефильтрованный список, а не
+    // блокируем страницу целиком из-за одной упавшей ручки.
     getMyProfile()
-      .then((data) => !cancelled && setProfile(data))
-      .catch(() => !cancelled && setProfileError(true))
+      .then((data) => {
+        if (cancelled) return undefined
+        setProfile(data)
+        return data.address
+      })
+      .catch(() => {
+        if (!cancelled) setProfileError(true)
+        return undefined
+      })
+      .then((address) =>
+        requestsApi
+          .list(address)
+          .then((data) => !cancelled && setRecent(data.slice(0, RECENT_COUNT)))
+          .catch((e) => !cancelled && setRecentError(e instanceof Error ? e.message : 'Не удалось загрузить заявки')),
+      )
+
     listAnnouncements().then((data) => !cancelled && setAnnouncements(data))
-    requestsApi
-      .list()
-      .then((data) => !cancelled && setRecent(data.slice(0, RECENT_COUNT)))
-      .catch((e) => !cancelled && setRecentError(e instanceof Error ? e.message : 'Не удалось загрузить заявки'))
     return () => {
       cancelled = true
     }
@@ -48,6 +63,15 @@ export function HomePage() {
       )}
       {profileError && (
         <p className="field-hint">Адрес пока недоступен — эндпоинт профиля ещё не подключён.</p>
+      )}
+
+      {/* Единственный вход на /dispatcher из интерфейса (помимо кнопки в
+          боте с payload=admin) — иначе роль DISPATCHER просто не может
+          попасть на свою панель без выхода в MAX. */}
+      {profile?.role === 'DISPATCHER' && (
+        <Link to="/dispatcher" className="card card--brand-outline" style={{ padding: 16, textDecoration: 'none', color: 'inherit' }}>
+          <strong>Панель диспетчера →</strong>
+        </Link>
       )}
 
       {/* Баннер объявления — ждёт сущность «Новости» на бэке (её пока нет

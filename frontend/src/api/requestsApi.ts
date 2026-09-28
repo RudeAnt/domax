@@ -2,7 +2,8 @@ import type { CreateRequestInput, RequestStatus, ServiceRequest } from '../types
 import { getToken } from '../lib/auth'
 
 export interface RequestsApi {
-  list(): Promise<ServiceRequest[]>
+  /** address — фильтр по дому автора (бэк уже принимает ?address=, см. tickets.controller.ts). */
+  list(address?: string): Promise<ServiceRequest[]>
   get(id: string): Promise<ServiceRequest | undefined>
   create(input: CreateRequestInput): Promise<ServiceRequest>
   upvote(id: string): Promise<ServiceRequest>
@@ -35,8 +36,9 @@ async function parseOrThrow<T>(res: Response): Promise<T> {
 }
 
 class HttpRequestsApi implements RequestsApi {
-  async list(): Promise<ServiceRequest[]> {
-    const res = await fetch(`${BASE_URL}/tickets`, {
+  async list(address?: string): Promise<ServiceRequest[]> {
+    const query = address ? `?address=${encodeURIComponent(address)}` : ''
+    const res = await fetch(`${BASE_URL}/tickets${query}`, {
       headers: { ...authHeaders() },
     })
     return parseOrThrow<ServiceRequest[]>(res)
