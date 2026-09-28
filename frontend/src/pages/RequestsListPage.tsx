@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import bellIcon from '../assets/nav/bell.png'
 import { requestsApi } from '../api/requestsApi'
-import { PageHeader } from '../components/PageHeader'
-import { SlaTimer } from '../components/SlaTimer'
-import { StatusBadge } from '../components/StatusBadge'
-import { CATEGORY_CONFIG } from '../data/slaConfig'
+import { BottomNav } from '../components/BottomNav'
+import { RequestCard } from '../components/RequestCard'
+import { TileLink } from '../components/TileLink'
 import type { RequestStatus, ServiceRequest } from '../types/request'
 
 type TabId = 'new' | 'in_progress' | 'done'
@@ -13,9 +12,15 @@ const TABS: { id: TabId; label: string; statuses: RequestStatus[] }[] = [
   { id: 'new', label: 'Новые', statuses: ['CREATED'] },
   { id: 'in_progress', label: 'В работе', statuses: ['IN_PROGRESS'] },
   // В макете один таб «Завершенные» на оба финальных статуса — COMPLETED
-  // (ждёт подтверждения) и CLOSED (закрыта) — отдельного таба под них нет.
+  // (выполнено, ждёт подтверждения) и CLOSED (закрыта).
   { id: 'done', label: 'Завершенные', statuses: ['COMPLETED', 'CLOSED'] },
 ]
+
+const EMPTY_TEXT: Record<TabId, string> = {
+  new: 'Новых заявок нет.',
+  in_progress: 'Заявок в работе нет.',
+  done: 'Завершённых заявок пока нет.',
+}
 
 export function RequestsListPage() {
   const [requests, setRequests] = useState<ServiceRequest[] | null>(null)
@@ -45,8 +50,12 @@ export function RequestsListPage() {
 
   return (
     <>
-      <PageHeader title="Заявки" showBack />
-      <main className="app-content stack">
+      <main className="app-content">
+        <div className="title-row">
+          <h1 className="page-title">Заявки</h1>
+          <TileLink to="/notifications" icon={bellIcon} label="Уведомления" soft />
+        </div>
+
         <div className="tabs" role="tablist">
           {TABS.map((tab) => (
             <button
@@ -73,44 +82,21 @@ export function RequestsListPage() {
 
         {!error && filtered !== null && filtered.length === 0 && (
           <div className="empty-state">
-            <p>
-              {activeTab === 'new'
-                ? 'Новых заявок нет.'
-                : activeTab === 'in_progress'
-                  ? 'Заявок в работе нет.'
-                  : 'Завершённых заявок пока нет.'}
-            </p>
+            <p>{EMPTY_TEXT[activeTab]}</p>
             {activeTab === 'new' && (
               <p className="field-hint">Нажмите «+», чтобы подать первую заявку в УК.</p>
             )}
           </div>
         )}
 
-        {filtered?.map((request) => (
-          <Link
-            key={request.id}
-            to={`/requests/${request.id}`}
-            className="card"
-            style={{ display: 'block', padding: 16, textDecoration: 'none', color: 'inherit' }}
-          >
-            <div className="stack" style={{ gap: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                <strong>{CATEGORY_CONFIG.find((c) => c.id === request.category)?.label}</strong>
-                <StatusBadge status={request.status} />
-              </div>
-              <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>
-                {request.description}
-              </p>
-              <SlaTimer request={request} />
-            </div>
-          </Link>
-        ))}
+        <div className="request-list">
+          {filtered?.map((request) => (
+            <RequestCard key={request.id} request={request} />
+          ))}
+        </div>
       </main>
 
-      <Link to="/new" className="fab" aria-label="Новая заявка">
-        +
-      </Link>
+      <BottomNav left="home" />
     </>
   )
 }
-

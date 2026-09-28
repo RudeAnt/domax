@@ -1,14 +1,17 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { requestsApi } from '../api/requestsApi'
 import { CategoryPicker } from '../components/CategoryPicker'
-import { PageHeader } from '../components/PageHeader'
 import { PhotoUpload } from '../components/PhotoUpload'
+import { SEND_ANIMATION_MS, SendAnimation } from '../components/SendAnimation'
 import { classifyCategory } from '../utils/classifyCategory'
 import type { RequestCategory } from '../types/request'
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 export function NewRequestPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<RequestCategory>('OTHER')
@@ -17,6 +20,7 @@ export function NewRequestPage() {
   const [floor, setFloor] = useState('')
   const [photoUrl, setPhotoUrl] = useState<string | undefined>()
   const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const suggested = useMemo(() => classifyCategory(description), [description])
 
@@ -27,54 +31,67 @@ export function NewRequestPage() {
     }
   }
 
+  // Крестик возвращает туда, откуда пришли; при прямом заходе на /new — на главную.
+  function handleClose() {
+    if (location.key !== 'default') navigate(-1)
+    else navigate('/', { replace: true })
+  }
+
   const isValid = title.trim().length > 0 && description.trim().length > 0
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!isValid || submitting) return
     setSubmitting(true)
+    setError(null)
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     try {
-      const created = await requestsApi.create({
-        title: title.trim(),
-        category,
-        description: description.trim(),
-        entrance: entrance ? Number(entrance) : undefined,
-        floor: floor ? Number(floor) : undefined,
-        photoUrl,
-      })
+      // Запрос и анимация конверта идут параллельно: переходим, когда готово и то и другое.
+      const [created] = await Promise.all([
+        requestsApi.create({
+          title: title.trim(),
+          category,
+          description: description.trim(),
+          entrance: entrance ? Number(entrance) : undefined,
+          floor: floor ? Number(floor) : undefined,
+          photoUrl,
+        }),
+        sleep(reduceMotion ? 0 : SEND_ANIMATION_MS),
+      ])
       navigate(`/requests/${created.id}`, { replace: true })
-    } finally {
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Не удалось отправить заявку')
       setSubmitting(false)
     }
   }
 
   return (
     <>
-      <PageHeader title="Новая заявка" showBack />
       <main className="app-content">
-        <form className="stack" onSubmit={handleSubmit}>
-          <div className="field">
-            <label htmlFor="title">Тема заявки</label>
-            <input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Например: течёт потолок в ванной"
-              required
-            />
-          </div>
+        <form className="form-panel" onSubmit={handleSubmit}>
+          <button type="button" className="form-panel__close" aria-label="Закрыть" onClick={handleClose}>
+            <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+              <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+          </button>
 
-          <div className="field">
-            <label htmlFor="description">Подробное описание</label>
-            <textarea
-              id="description"
-              rows={4}
-              value={description}
-              onChange={(e) => handleDescriptionChange(e.target.value)}
-              placeholder="Опишите проблему подробнее — это поможет мастеру подготовиться заранее"
-              required
-            />
-          </div>
+          <input
+            className="panel-input"
+            aria-label="Тема заявки"
+            placeholder="Тема заявки"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+
+          <textarea
+            className="panel-input panel-input--area"
+            aria-label="Подробное описание"
+            placeholder="Подробное описание"
+            value={description}
+            onChange={(e) => handleDescriptionChange(e.target.value)}
+            required
+          />
 
           <CategoryPicker
             value={category}
@@ -85,41 +102,43 @@ export function NewRequestPage() {
             }}
           />
 
-          <div className="field">
-            <label id="place-label">Место проблемы</label>
-            <div style={{ display: 'flex', gap: 'var(--space-3)' }} role="group" aria-labelledby="place-label">
-              <input
-                type="number"
-                min={1}
-                inputMode="numeric"
-                value={entrance}
-                onChange={(e) => setEntrance(e.target.value)}
-                placeholder="Подъезд №"
-                aria-label="Подъезд"
-                style={{ flex: 1 }}
-              />
-              <input
-                type="number"
-                inputMode="numeric"
-                value={floor}
-                onChange={(e) => setFloor(e.target.value)}
-                placeholder="Этаж"
-                aria-label="Этаж"
-                style={{ flex: 1 }}
-              />
-            </div>
-            <p className="field-hint">
-              Адрес дома берётся из вашего профиля — здесь достаточно уточнить подъезд и этаж.
-            </p>
+          <div className="panel-row" role="group" aria-label="Место проблемы">
+            <input
+              className="panel-input"
+              type="number"
+              min={1}
+              inputMode="numeric"
+              aria-label="Подъезд"
+              placeholder="Подъезд №"
+              value={entrance}
+              onChange={(e) => setEntrance(e.target.value)}
+            />
+            <input
+              className="panel-input"
+              type="number"
+              inputMode="numeric"
+              aria-label="Этаж"
+              placeholder="Этаж"
+              value={floor}
+              onChange={(e) => setFloor(e.target.value)}
+            />
           </div>
 
           <PhotoUpload value={photoUrl} onChange={setPhotoUrl} />
 
-          <button type="submit" className="btn btn-primary" disabled={!isValid || submitting}>
-            {submitting ? 'Отправка…' : 'Оформить заявку'}
+          {error && (
+            <p className="form-panel__error" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button type="submit" className="btn-gradient" disabled={!isValid || submitting}>
+            Отправить
           </button>
         </form>
       </main>
+
+      {submitting && <SendAnimation />}
     </>
   )
 }

@@ -7,10 +7,12 @@ import { EmptyState } from '../components/ui/EmptyState'
 import { Fab } from '../components/ui/Fab'
 import { IconButton } from '../components/ui/IconButton'
 import { PageHeader } from '../components/PageHeader'
+import { StatusControl } from '../components/StatusControl'
 import { Select } from '../components/ui/Select'
 import { Spinner } from '../components/ui/Spinner'
 import { TextArea } from '../components/ui/TextArea'
 import { TextField } from '../components/ui/TextField'
+import type { RequestStatus } from '../types/request'
 
 /**
  * Только для разработки — визуальная проверка src/components/ui на
@@ -20,6 +22,7 @@ import { TextField } from '../components/ui/TextField'
 export function PlaygroundPage() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [demoStatus, setDemoStatus] = useState<RequestStatus>('CREATED')
 
   return (
     <>
@@ -65,6 +68,13 @@ export function PlaygroundPage() {
             <Badge tone="warning">Warning</Badge>
             <Badge tone="danger">Danger</Badge>
             <Badge tone="success">Success</Badge>
+          </div>
+        </Card>
+
+        <Card style={{ padding: 'var(--space-4)' }}>
+          <p style={{ marginTop: 0 }}>StatusControl (диспетчер) — текущий статус: {demoStatus}</p>
+          <div style={{ minHeight: 130 }}>
+            <StatusControl status={demoStatus} onChange={setDemoStatus} />
           </div>
         </Card>
 
