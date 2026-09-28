@@ -16,3 +16,32 @@ export async function listAnnouncements(): Promise<Announcement[]> {
   if (!res.ok) return []
   return res.json()
 }
+
+function authHeaders(): HeadersInit {
+  const token = getToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+/** POST /announcements — доступно только роли DISPATCHER на бэкенде. */
+export async function createAnnouncement(input: { title: string; body: string }): Promise<Announcement> {
+  const res = await fetch(`${BASE_URL}/announcements`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(input),
+  })
+  if (!res.ok) {
+    throw new Error(`Не удалось опубликовать объявление: ${res.status}`)
+  }
+  return res.json()
+}
+
+/** DELETE /announcements/:id — доступно только роли DISPATCHER на бэкенде. */
+export async function removeAnnouncement(id: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/announcements/${id}`, {
+    method: 'DELETE',
+    headers: { ...authHeaders() },
+  })
+  if (!res.ok) {
+    throw new Error(`Не удалось удалить объявление: ${res.status}`)
+  }
+}

@@ -1,12 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { getMyProfile } from '../api/usersApi'
 import { requestsApi } from '../api/requestsApi'
+import { createAnnouncement, listAnnouncements, removeAnnouncement } from '../api/announcementsApi'
 import { PageHeader } from '../components/PageHeader'
 import { StatusBadge } from '../components/StatusBadge'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { EmptyState } from '../components/ui/EmptyState'
+import { IconButton } from '../components/ui/IconButton'
+import { TextArea } from '../components/ui/TextArea'
+import { TextField } from '../components/ui/TextField'
 import { CATEGORY_CONFIG } from '../data/slaConfig'
+import type { Announcement } from '../types/home'
 import type { RequestStatus, ServiceRequest } from '../types/request'
 
 /**
@@ -29,6 +34,13 @@ export function DispatcherPage() {
   const [error, setError] = useState<string | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
 
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [announcementTitle, setAnnouncementTitle] = useState('')
+  const [announcementBody, setAnnouncementBody] = useState('')
+  const [publishing, setPublishing] = useState(false)
+  const [announcementError, setAnnouncementError] = useState<string | null>(null)
+  const [deletingAnnouncementId, setDeletingAnnouncementId] = useState<string | null>(null)
+
   useEffect(() => {
     let cancelled = false
     getMyProfile()
@@ -40,9 +52,14 @@ export function DispatcherPage() {
         // с проверкой роли: иначе список на мгновение отрисуется для любого
         // пользователя, пока role ещё null (см. рендер ниже).
         if (profile.role !== 'DISPATCHER') return
-        return requestsApi.list()
+        return Promise.all([requestsApi.list(), listAnnouncements()])
       })
-      .then((data) => !cancelled && data && setRequests(data))
+      .then((result) => {
+        if (cancelled || !result) return
+        const [requestsData, announcementsData] = result
+        setRequests(requestsData)
+        setAnnouncements(announcementsData)
+      })
       .catch((e) =>
         !cancelled &&
         setError(e instanceof Error ? e.message : 'Не удалось проверить роль пользователя или загрузить заявки'),
@@ -51,6 +68,39 @@ export function DispatcherPage() {
       cancelled = true
     }
   }, [])
+
+  async function handlePublishAnnouncement(e: FormEvent) {
+    e.preventDefault()
+    if (!announcementTitle.trim() || !announcementBody.trim() || publishing) return
+    setPublishing(true)
+    setAnnouncementError(null)
+    try {
+      const created = await createAnnouncement({
+        title: announcementTitle.trim(),
+        body: announcementBody.trim(),
+      })
+      setAnnouncements((prev) => [created, ...prev])
+      setAnnouncementTitle('')
+      setAnnouncementBody('')
+    } catch (e) {
+      setAnnouncementError(e instanceof Error ? e.message : 'Не удалось опубликовать объявление')
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  async function handleRemoveAnnouncement(id: string) {
+    setDeletingAnnouncementId(id)
+    setAnnouncementError(null)
+    try {
+      await removeAnnouncement(id)
+      setAnnouncements((prev) => prev.filter((a) => a.id !== id))
+    } catch (e) {
+      setAnnouncementError(e instanceof Error ? e.message : 'Не удалось удалить объявление')
+    } finally {
+      setDeletingAnnouncementId(null)
+    }
+  }
 
   async function handleAdvance(request: ServiceRequest) {
     const next = NEXT_STATUS[request.status]
@@ -93,6 +143,52 @@ export function DispatcherPage() {
     <>
       <PageHeader title="Панель администратора" showBack />
       <main className="app-content stack">
+        <Card style={{ padding: 16 }}>
+          <div className="stack" style={{ gap: 12 }}>
+            <strong>Новости дома</strong>
+
+            <form onSubmit={handlePublishAnnouncement} className="stack" style={{ gap: 8 }}>
+              <TextField
+                label="Заголовок"
+                value={announcementTitle}
+                onChange={(e) => setAnnouncementTitle(e.target.value)}
+                placeholder="Плановое отключение воды"
+              />
+              <TextArea
+                label="Текст"
+                value={announcementBody}
+                onChange={(e) => setAnnouncementBody(e.target.value)}
+                placeholder="27 сентября с 10:00 до 14:00 будет отключена холодная вода на всём доме."
+              />
+              {announcementError && <p className="field-hint field-hint--error">{announcementError}</p>}
+              <Button
+                type="submit"
+                variant="secondary"
+                loading={publishing}
+                disabled={!announcementTitle.trim() || !announcementBody.trim()}
+              >
+                Опубликовать
+              </Button>
+            </form>
+
+            {announcements.map((a) => (
+              <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'flex-start' }}>
+                <div>
+                  <p style={{ margin: 0 }}>{a.title}</p>
+                  <p className="field-hint" style={{ margin: 0 }}>{a.body}</p>
+                </div>
+                <IconButton
+                  aria-label="Удалить объявление"
+                  onClick={() => handleRemoveAnnouncement(a.id)}
+                  disabled={deletingAnnouncementId === a.id}
+                >
+                  ✕
+                </IconButton>
+              </div>
+            ))}
+          </div>
+        </Card>
+
         {error && (
           <div className="empty-state">
             <p>Ошибка</p>
