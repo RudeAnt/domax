@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { getMyProfile } from '../api/usersApi'
+import { getMyProfile, updateMyProfile } from '../api/usersApi'
 import { listAnnouncements } from '../api/announcementsApi'
 import { requestsApi } from '../api/requestsApi'
 import { SlaTimer } from '../components/SlaTimer'
 import { StatusBadge } from '../components/StatusBadge'
+import { BottomSheet } from '../components/ui/BottomSheet'
+import { Button } from '../components/ui/Button'
+import { TextField } from '../components/ui/TextField'
 import { CATEGORY_CONFIG } from '../data/slaConfig'
 import type { Announcement, UserProfile } from '../types/home'
 import type { ServiceRequest } from '../types/request'
@@ -17,6 +20,12 @@ export function HomePage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [recent, setRecent] = useState<ServiceRequest[] | null>(null)
   const [recentError, setRecentError] = useState<string | null>(null)
+
+  const [addressSheetOpen, setAddressSheetOpen] = useState(false)
+  const [addressInput, setAddressInput] = useState('')
+  const [apartmentInput, setApartmentInput] = useState('')
+  const [savingAddress, setSavingAddress] = useState(false)
+  const [addressSaveError, setAddressSaveError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -50,20 +59,81 @@ export function HomePage() {
 
   const latestAnnouncement = announcements[0]
 
+  function openAddressSheet() {
+    if (!profile) return
+    setAddressInput(profile.address)
+    setApartmentInput(profile.apartment ? String(profile.apartment) : '')
+    setAddressSaveError(null)
+    setAddressSheetOpen(true)
+  }
+
+  async function handleSaveAddress(e: FormEvent) {
+    e.preventDefault()
+    if (!addressInput.trim() || savingAddress) return
+    setSavingAddress(true)
+    setAddressSaveError(null)
+    try {
+      const updated = await updateMyProfile({
+        address: addressInput.trim(),
+        apartment: apartmentInput ? Number(apartmentInput) : undefined,
+      })
+      setProfile(updated)
+      setAddressSheetOpen(false)
+    } catch (e) {
+      setAddressSaveError(e instanceof Error ? e.message : 'Не удалось сохранить адрес')
+    } finally {
+      setSavingAddress(false)
+    }
+  }
+
   return (
     <>
     <main className="app-content stack">
-      {/* Адрес — ждёт GET /users/me на бэке (см. api/usersApi.ts). Пока
-          эндпоинта нет, честно молчим вместо выдуманного адреса. */}
+      {/* Тап по адресу открывает форму редактирования — PATCH /users/me
+          пока нет на бэке (см. api/usersApi.ts, updateMyProfile), поэтому
+          сохранение здесь до готовности бэкенда будет падать с ошибкой. */}
       {profile && (
-        <p style={{ margin: 0, fontSize: 15, color: 'var(--color-text-muted)' }}>
+        <button
+          type="button"
+          onClick={openAddressSheet}
+          style={{
+            margin: 0,
+            padding: 0,
+            border: 'none',
+            background: 'none',
+            fontSize: 15,
+            color: 'var(--color-text-muted)',
+            textAlign: 'left',
+            textDecoration: 'underline',
+          }}
+        >
           {profile.address}
           {profile.apartment ? `, кв. ${profile.apartment}` : ''}
-        </p>
+        </button>
       )}
       {profileError && (
         <p className="field-hint">Адрес пока недоступен — эндпоинт профиля ещё не подключён.</p>
       )}
+
+      <BottomSheet open={addressSheetOpen} onClose={() => setAddressSheetOpen(false)} title="Ваш адрес">
+        <form onSubmit={handleSaveAddress} className="stack" style={{ gap: 12 }}>
+          <TextField
+            label="Адрес дома"
+            value={addressInput}
+            onChange={(e) => setAddressInput(e.target.value)}
+          />
+          <TextField
+            label="Квартира"
+            type="number"
+            value={apartmentInput}
+            onChange={(e) => setApartmentInput(e.target.value)}
+          />
+          {addressSaveError && <p className="field-hint field-hint--error">{addressSaveError}</p>}
+          <Button type="submit" loading={savingAddress} disabled={!addressInput.trim()}>
+            Сохранить
+          </Button>
+        </form>
+      </BottomSheet>
 
       {/* Единственный вход на /dispatcher из интерфейса (помимо кнопки в
           боте с payload=admin) — иначе роль DISPATCHER просто не может
