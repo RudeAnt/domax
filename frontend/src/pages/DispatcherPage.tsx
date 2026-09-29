@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { getMyProfile } from '../api/usersApi'
 import { requestsApi } from '../api/requestsApi'
-import { createAnnouncement, listAnnouncements, removeAnnouncement } from '../api/announcementsApi'
+import { createAnnouncement, listAnnouncements, deleteAnnouncement } from '../api/announcementsApi'
 import { PageHeader } from '../components/PageHeader'
 import { StatusBadge } from '../components/StatusBadge'
 import { Button } from '../components/ui/Button'
@@ -93,7 +93,7 @@ export function DispatcherPage() {
     setDeletingAnnouncementId(id)
     setAnnouncementError(null)
     try {
-      await removeAnnouncement(id)
+      await deleteAnnouncement(id)
       setAnnouncements((prev) => prev.filter((a) => a.id !== id))
     } catch (e) {
       setAnnouncementError(e instanceof Error ? e.message : 'Не удалось удалить объявление')

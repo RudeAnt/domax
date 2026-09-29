@@ -4,7 +4,9 @@ import { requestsApi } from '../api/requestsApi'
 import { getMyProfile } from '../api/usersApi'
 import { BottomNav } from '../components/BottomNav'
 import { RequestCard } from '../components/RequestCard'
+import { StatusControl } from '../components/StatusControl'
 import { TileLink } from '../components/TileLink'
+import { getRole } from '../lib/auth'
 import type { RequestStatus, ServiceRequest } from '../types/request'
 
 type TabId = 'new' | 'in_progress' | 'done'
@@ -12,8 +14,6 @@ type TabId = 'new' | 'in_progress' | 'done'
 const TABS: { id: TabId; label: string; statuses: RequestStatus[] }[] = [
   { id: 'new', label: 'Новые', statuses: ['CREATED'] },
   { id: 'in_progress', label: 'В работе', statuses: ['IN_PROGRESS'] },
-  // В макете один таб «Завершенные» на оба финальных статуса — COMPLETED
-  // (выполнено, ждёт подтверждения) и CLOSED (закрыта).
   { id: 'done', label: 'Завершенные', statuses: ['COMPLETED', 'CLOSED'] },
 ]
 
@@ -24,14 +24,13 @@ const EMPTY_TEXT: Record<TabId, string> = {
 }
 
 export function RequestsListPage() {
+  const isDispatcher = getRole() === 'DISPATCHER'
   const [requests, setRequests] = useState<ServiceRequest[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<TabId>('new')
 
   useEffect(() => {
     let cancelled = false
-    // Фильтруем по адресу дома жителя — если профиль не
-    // загрузился, показываем нефильтрованный список вместо пустого экрана.
     getMyProfile()
       .then((profile) => profile.address)
       .catch(() => undefined)
@@ -49,6 +48,12 @@ export function RequestsListPage() {
       cancelled = true
     }
   }, [])
+
+  function handleStatusChange(id: string, status: RequestStatus) {
+    requestsApi.updateStatus(id, status).then((updated) => {
+      setRequests((prev) => prev?.map((r) => (r.id === id ? updated : r)) ?? prev)
+    })
+  }
 
   const activeStatuses = TABS.find((t) => t.id === activeTab)!.statuses
   const filtered = useMemo(
@@ -99,7 +104,18 @@ export function RequestsListPage() {
 
         <div className="request-list">
           {filtered?.map((request) => (
-            <RequestCard key={request.id} request={request} />
+            <RequestCard
+              key={request.id}
+              request={request}
+              action={
+                isDispatcher ? (
+                  <StatusControl
+                    status={request.status}
+                    onChange={(next) => handleStatusChange(request.id, next)}
+                  />
+                ) : undefined
+              }
+            />
           ))}
         </div>
       </main>
@@ -108,4 +124,3 @@ export function RequestsListPage() {
     </>
   )
 }
-

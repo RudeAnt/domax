@@ -2,12 +2,10 @@ import type { CreateRequestInput, RequestStatus, ServiceRequest } from '../types
 import { getToken } from '../lib/auth'
 
 export interface RequestsApi {
-  /** address — фильтр по дому автора (бэк уже принимает ?address=, см. tickets.controller.ts). */
   list(address?: string): Promise<ServiceRequest[]>
   get(id: string): Promise<ServiceRequest | undefined>
   create(input: CreateRequestInput): Promise<ServiceRequest>
   upvote(id: string): Promise<ServiceRequest>
-  /** PATCH /tickets/:id/status — доступно только роли DISPATCHER на бэкенде. */
   updateStatus(id: string, status: RequestStatus): Promise<ServiceRequest>
 }
 
@@ -18,18 +16,13 @@ function authHeaders(): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
-// Бросает с понятным сообщением вместо того, чтобы дальше по цепочке
-// упасть на .map() над объектом ошибки — так вызывающий код может
-// показать пользователю осмысленное состояние вместо краша страницы.
 async function parseOrThrow<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let message = `Ошибка запроса: ${res.status}`
     try {
       const body = await res.json()
       if (body?.message) message = Array.isArray(body.message) ? body.message.join(', ') : body.message
-    } catch {
-      // тело не JSON — оставляем дефолтное сообщение
-    }
+    } catch {}
     throw new Error(message)
   }
   return res.json()
@@ -38,16 +31,12 @@ async function parseOrThrow<T>(res: Response): Promise<T> {
 class HttpRequestsApi implements RequestsApi {
   async list(address?: string): Promise<ServiceRequest[]> {
     const query = address ? `?address=${encodeURIComponent(address)}` : ''
-    const res = await fetch(`${BASE_URL}/tickets${query}`, {
-      headers: { ...authHeaders() },
-    })
+    const res = await fetch(`${BASE_URL}/tickets${query}`, { headers: { ...authHeaders() } })
     return parseOrThrow<ServiceRequest[]>(res)
   }
 
   async get(id: string): Promise<ServiceRequest | undefined> {
-    const res = await fetch(`${BASE_URL}/tickets/${id}`, {
-      headers: { ...authHeaders() },
-    })
+    const res = await fetch(`${BASE_URL}/tickets/${id}`, { headers: { ...authHeaders() } })
     if (res.status === 404) return undefined
     return parseOrThrow<ServiceRequest>(res)
   }
@@ -80,4 +69,3 @@ class HttpRequestsApi implements RequestsApi {
 }
 
 export const requestsApi: RequestsApi = new HttpRequestsApi()
-

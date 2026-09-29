@@ -447,6 +447,23 @@
   overflow: hidden;
 }
 
+.announcement--link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.announcement--list {
+  position: relative;
+  margin-top: 16px;
+}
+
+.announcement__text--full {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
 /* --- Форма новой заявки: серая панель поверх градиента --- */
 .form-panel {
   display: flex;
@@ -737,4 +754,43 @@ select.panel-input {
   .splash__gradient {
     transition: none;
   }
+}
+
+
+/* --- Секция «Новости» у диспетчера: заголовок + кнопка добавления --- */
+.title-row--news {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--space-3) 0 0;
+}
+
+.title-row--news .section-title {
+  margin: 0;
+}
+
+/* --- Панель создания новости --- */
+.news-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 14px;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  background:
+    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+    var(--gradient-brand) border-box;
+}
+
+.news-composer__row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.news-composer__row .btn-secondary {
+  width: auto;
+  padding: 10px 16px;
 }

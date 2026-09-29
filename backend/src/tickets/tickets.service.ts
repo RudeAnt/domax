@@ -40,7 +40,10 @@ export class TicketsService {
 
   // Фильтры по дому (для домовой ленты) и по статусу (для очереди диспетчера).
   async findAll(filters: { address?: string; status?: TicketStatus }): Promise<Ticket[]> {
-    const qb = this.repo.createQueryBuilder('ticket');
+    const qb = this.repo
+      .createQueryBuilder('ticket')
+      .leftJoinAndSelect('ticket.author', 'author')
+      .leftJoinAndSelect('ticket.assignee', 'assignee');
 
     if (filters.address) {
       qb.andWhere('ticket.address = :address', { address: filters.address });
@@ -49,7 +52,6 @@ export class TicketsService {
       qb.andWhere('ticket.status = :status', { status: filters.status });
     }
 
-    // Просроченные и горящие — наверх очереди диспетчера.
     qb.orderBy('ticket.slaDeadline', 'ASC');
     return qb.getMany();
   }
