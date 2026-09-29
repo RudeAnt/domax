@@ -9,10 +9,11 @@ interface CategoryPickerProps {
 
 export function CategoryPicker({ value, onChange, suggested }: CategoryPickerProps) {
   return (
-    <div className="field">
-      <label htmlFor="category">Категория</label>
+    <div className="panel-field">
       <select
         id="category"
+        className="panel-input"
+        aria-label="Категория"
         value={value}
         onChange={(e) => onChange(e.target.value as RequestCategory)}
       >
@@ -31,4 +32,3 @@ export function CategoryPicker({ value, onChange, suggested }: CategoryPickerPro
     </div>
   )
 }
-

@@ -3,18 +3,9 @@ import { getToken } from '../lib/auth'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
-/**
- * GET /announcements — список объявлений УК для баннера на главной.
- * На любую ошибку возвращает пустой массив — баннер на HomePage просто
- * не рендерится, без выдуманного контента.
- */
-export async function listAnnouncements(): Promise<Announcement[]> {
-  const token = getToken()
-  const res = await fetch(`${BASE_URL}/announcements`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
-  if (!res.ok) return []
-  return res.json()
+export interface CreateAnnouncementInput {
+  title: string
+  body: string
 }
 
 function authHeaders(): HeadersInit {
@@ -22,26 +13,38 @@ function authHeaders(): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
-/** POST /announcements — доступно только роли DISPATCHER на бэкенде. */
-export async function createAnnouncement(input: { title: string; body: string }): Promise<Announcement> {
+async function parseOrThrow<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    let message = `Ошибка запроса: ${res.status}`
+    try {
+      const body = await res.json()
+      if (body?.message) message = Array.isArray(body.message) ? body.message.join(', ') : body.message
+    } catch {}
+    throw new Error(message)
+  }
+  if (res.status === 204) return undefined as T
+  return res.json()
+}
+
+export async function listAnnouncements(): Promise<Announcement[]> {
+  const res = await fetch(`${BASE_URL}/announcements`, { headers: authHeaders() })
+  if (!res.ok) return []
+  return res.json()
+}
+
+export async function createAnnouncement(input: CreateAnnouncementInput): Promise<Announcement> {
   const res = await fetch(`${BASE_URL}/announcements`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(input),
   })
-  if (!res.ok) {
-    throw new Error(`Не удалось опубликовать объявление: ${res.status}`)
-  }
-  return res.json()
+  return parseOrThrow<Announcement>(res)
 }
 
-/** DELETE /announcements/:id — доступно только роли DISPATCHER на бэкенде. */
-export async function removeAnnouncement(id: string): Promise<void> {
+export async function deleteAnnouncement(id: string): Promise<void> {
   const res = await fetch(`${BASE_URL}/announcements/${id}`, {
     method: 'DELETE',
-    headers: { ...authHeaders() },
+    headers: authHeaders(),
   })
-  if (!res.ok) {
-    throw new Error(`Не удалось удалить объявление: ${res.status}`)
-  }
+  await parseOrThrow<void>(res)
 }

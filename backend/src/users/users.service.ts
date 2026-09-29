@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -18,8 +19,6 @@ export class UsersService {
     return this.repo.findOneBy({ maxUserId });
   }
 
-  // Используется реальным MAX-логином (POST /api/auth/max): если пользователь
-  // с этим maxUserId уже есть — возвращаем его, иначе создаём с ролью RESIDENT по умолчанию.
   async findOrCreateByMaxId(maxUserId: string, fullName: string): Promise<User> {
     const existing = await this.findByMaxId(maxUserId);
     if (existing) return existing;
@@ -32,8 +31,6 @@ export class UsersService {
     return this.repo.save(user);
   }
 
-  // Используется dev-login: создаёт (или переиспользует) синтетического пользователя
-  // с заданной ролью — без прохождения реальной авторизации MAX. Нужен только жюри/тестам.
   async findOrCreateDevUser(role: UserRole, maxUserId?: string): Promise<User> {
     const devMaxId = maxUserId ?? `dev-${role.toLowerCase()}`;
     const existing = await this.findByMaxId(devMaxId);
@@ -44,6 +41,15 @@ export class UsersService {
       fullName: role === UserRole.RESIDENT ? 'Тестовый житель' : 'Тестовый диспетчер',
       role,
     });
+    return this.repo.save(user);
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto): Promise<User> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+    Object.assign(user, dto);
     return this.repo.save(user);
   }
 }

@@ -1,4 +1,5 @@
 const TOKEN_KEY = 'domax.accessToken'
+const ROLE_KEY = 'domax.role'
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 export type UserRole = 'RESIDENT' | 'DISPATCHER'
@@ -15,11 +16,14 @@ export function clearToken(): void {
   localStorage.removeItem(TOKEN_KEY)
 }
 
-/**
- * Логин через dev-login — используется только вне клиента MAX (обычный
- * браузер, локальная разработка), когда нет initData для проверки.
- * Внутри MAX всегда должен срабатывать loginWithMax (см. AuthGate.tsx).
- */
+export function getRole(): UserRole {
+  return localStorage.getItem(ROLE_KEY) === 'DISPATCHER' ? 'DISPATCHER' : 'RESIDENT'
+}
+
+export function setRole(role: UserRole): void {
+  localStorage.setItem(ROLE_KEY, role)
+}
+
 export async function devLogin(role: UserRole): Promise<void> {
   const res = await fetch(`${BASE_URL}/auth/dev-login`, {
     method: 'POST',
@@ -33,12 +37,6 @@ export async function devLogin(role: UserRole): Promise<void> {
   setToken(data.accessToken)
 }
 
-/**
- * Боевой вход через MAX WebApp. initData — сырая подписанная строка из
- * MAX Bridge (см. src/lib/maxBridge.ts, getInitData()). Бэкенд сам
- * проверяет подпись через HMAC-SHA256 токеном бота — фронт ей не доверяет
- * и ничего сам не парсит, просто пересылает как есть.
- */
 export async function loginWithMax(initData: string): Promise<void> {
   const res = await fetch(`${BASE_URL}/auth/max`, {
     method: 'POST',
@@ -51,4 +49,3 @@ export async function loginWithMax(initData: string): Promise<void> {
   const data = await res.json()
   setToken(data.accessToken)
 }
-
