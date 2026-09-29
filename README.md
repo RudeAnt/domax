@@ -221,8 +221,4 @@ docker compose down -v
 Повторный запуск:
 
 ```bash
-docker compose up --build
-```
-```
-```
-```
+docker compose up --build ```
