@@ -15,9 +15,24 @@ function logUserId(userId: number | undefined | null) {
   console.log(`[start] сообщение от user_id=${userId}`)
 }
 
-function replyWithDialogWelcome(ctx: Context, userId: number | undefined | null) {
+/**
+ * Текст и кнопка отправляются ДВУМЯ отдельными сообщениями, а не одним.
+ * Раньше были вместе — и если MAX отклонял кнопку (например, ссылка на
+ * мини-апп ещё не зарегистрирована у организаторов), падало вообще всё
+ * сообщение целиком, включая текст приветствия. Теперь даже если кнопка
+ * не отправится, текст всё равно дойдёт до пользователя.
+ */
+async function replyWithDialogWelcome(ctx: Context, userId: number | undefined | null): Promise<void> {
+  await ctx.reply(DIALOG_WELCOME)
+
   const keyboard = buildDialogKeyboard(userId)
-  return ctx.reply(DIALOG_WELCOME, keyboard ? { attachments: [keyboard] } : undefined)
+  if (!keyboard) return
+
+  try {
+    await ctx.reply('👇', { attachments: [keyboard] })
+  } catch (error) {
+    console.error('[start] не удалось отправить кнопку мини-аппа', error)
+  }
 }
 
 /** Срабатывает, когда пользователь впервые нажал "Старт" в личном диалоге с ботом. */
