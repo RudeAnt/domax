@@ -29,19 +29,11 @@
   --color-success-bg: #f0fdf4;
 
   /* Брендовые токены */
-  --color-brand-dark: #0d0016;
+  --color-brand-dark: #0d001a; /* «Тёмная материя» — цвет от дизайнера (Тоня) */
   --color-brand-surface: #210c46;
-  /* Официальные цвета MAX (go.max.ru/brandbook) */
-  --color-brand-blue: #471aff; /* Синий гигант */
-  --color-brand-accent-a: #9500ff; /* Пурпурная туманность */
-  --color-brand-pulsar: #6e1aff; /* Фиолетовый пульсар */
-  --color-brand-accent-b: #00bfff; /* Голубая комета */
-  --gradient-brand: linear-gradient(
-    135deg,
-    var(--color-brand-blue) 0%,
-    var(--color-brand-accent-a) 50%,
-    var(--color-brand-accent-b) 100%
-  );
+  --color-brand-accent-a: #a62dff;
+  --color-brand-accent-b: #2ec5ff;
+  --gradient-brand: linear-gradient(135deg, var(--color-brand-accent-a) 0%, var(--color-brand-accent-b) 100%);
 
   /* Плитки-кнопки: нижняя панель и колокольчик/домик справа вверху */
   --nav-tile: #210c46;
@@ -71,7 +63,7 @@
   --space-5: 24px;
   --space-6: 32px;
 
-  --font-sans: 'FuturaOrto', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
   --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
   --shadow-card: 0 4px 14px rgba(20, 10, 40, 0.1);
@@ -84,8 +76,8 @@
 /* --- Тёмная тема: выбрана вручную --- */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --color-page: #121317;
-  --color-bg: #121317;
+  --color-page: #0d001a;
+  --color-bg: #0d001a;
   --color-surface: #1c1e24;
   --color-panel: #23252c;
   --color-tab-active: #2c2f38;
@@ -117,8 +109,8 @@
 /* --- Тёмная тема: по настройке ОС, если пользователь ничего не выбирал --- */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --color-page: #121317;
-    --color-bg: #121317;
+    --color-page: #0d001a;
+    --color-bg: #0d001a;
     --color-surface: #1c1e24;
     --color-panel: #23252c;
     --color-tab-active: #2c2f38;
@@ -147,3 +139,4 @@
     --status-CLOSED-text: #4ade80;
   }
 }
+

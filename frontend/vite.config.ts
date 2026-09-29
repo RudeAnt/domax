@@ -9,5 +9,10 @@ export default defineConfig({
     watch: {
       usePolling: true, 
     },
+    allowedHosts: [
+      'domax.46.29.167.230.sslip.io',
+      '.sslip.io',
+    ],
   },
 });
+
