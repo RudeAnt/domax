@@ -1,11 +1,14 @@
-import type { CreateRequestInput, ServiceRequest } from '../types/request'
+import type { CreateRequestInput, RequestStatus, ServiceRequest } from '../types/request'
 import { getToken } from '../lib/auth'
 
 export interface RequestsApi {
-  list(): Promise<ServiceRequest[]>
+  /** address — фильтр по дому автора (бэк уже принимает ?address=, см. tickets.controller.ts). */
+  list(address?: string): Promise<ServiceRequest[]>
   get(id: string): Promise<ServiceRequest | undefined>
   create(input: CreateRequestInput): Promise<ServiceRequest>
   upvote(id: string): Promise<ServiceRequest>
+  /** PATCH /tickets/:id/status — доступно только роли DISPATCHER на бэкенде. */
+  updateStatus(id: string, status: RequestStatus): Promise<ServiceRequest>
 }
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
@@ -33,8 +36,9 @@ async function parseOrThrow<T>(res: Response): Promise<T> {
 }
 
 class HttpRequestsApi implements RequestsApi {
-  async list(): Promise<ServiceRequest[]> {
-    const res = await fetch(`${BASE_URL}/tickets`, {
+  async list(address?: string): Promise<ServiceRequest[]> {
+    const query = address ? `?address=${encodeURIComponent(address)}` : ''
+    const res = await fetch(`${BASE_URL}/tickets${query}`, {
       headers: { ...authHeaders() },
     })
     return parseOrThrow<ServiceRequest[]>(res)
@@ -61,6 +65,15 @@ class HttpRequestsApi implements RequestsApi {
     const res = await fetch(`${BASE_URL}/tickets/${id}/upvote`, {
       method: 'POST',
       headers: { ...authHeaders() },
+    })
+    return parseOrThrow<ServiceRequest>(res)
+  }
+
+  async updateStatus(id: string, status: RequestStatus): Promise<ServiceRequest> {
+    const res = await fetch(`${BASE_URL}/tickets/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ status }),
     })
     return parseOrThrow<ServiceRequest>(res)
   }

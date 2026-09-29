@@ -37,7 +37,25 @@ interface MaxWebApp {
   expand?: () => void
   close?: () => void
   colorScheme?: 'light' | 'dark'
-  initDataUnsafe?: { user?: MaxWebAppUser }
+  /**
+   * УДОБНЫЙ, НО НЕДОВЕРЕННЫЙ объект — обычные данные в JS, их может
+   * подделать кто угодно через консоль браузера. Годится только для
+   * отображения (имя, аватар) и для start_param (payload запуска), НЕ для
+   * проверки личности на бэкенде.
+   *
+   * start_param: НЕ ПОДТВЕРЖДЕНО ПО ПЕРВОИСТОЧНИКУ (dev.max.ru недоступен
+   * из рабочей среды), но несколько независимых вторичных источников
+   * сходятся — сюда попадает payload из deep-link/openApp-кнопки бота
+   * (https://max.ru/<bot>?startapp=<payload>), например "admin" из кнопки
+   * "Панель администратора" в боте — см. bot/src/keyboards.ts.
+   */
+  initDataUnsafe?: { user?: MaxWebAppUser; start_param?: string }
+  /**
+   * Сырая ПОДПИСАННАЯ строка от MAX. Единственное, чему можно доверять —
+   * но проверять подпись нужно на бэкенде (HMAC-SHA256 с токеном бота как
+   * секретом, см. backend/src/auth/auth.service.ts), не здесь на фронте.
+   */
+  initData?: string
   BackButton?: MaxBackButton
   HapticFeedback?: MaxHapticFeedback
 }
@@ -67,6 +85,19 @@ export function initMaxBridge(): void {
 
 export function getCurrentUser(): MaxWebAppUser | undefined {
   return getWebApp()?.initDataUnsafe?.user
+}
+
+/** Подписанная строка для входа через POST /auth/max — см. lib/auth.ts, loginWithMax(). */
+export function getInitData(): string | undefined {
+  return getWebApp()?.initData
+}
+
+/**
+ * Payload, с которым запущен мини-апп (из кнопки бота или deep-link).
+ * Например "admin" — см. App.tsx, редирект на /dispatcher.
+ */
+export function getStartParam(): string | undefined {
+  return getWebApp()?.initDataUnsafe?.start_param
 }
 
 export function showBackButton(onClick: () => void): void {
