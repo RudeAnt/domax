@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import bellIcon from '../assets/nav/bell.png'
+import dispatcherIcon from '../assets/status-control/edit.png'
 import logo from '../assets/brand/logo.png'
 import { getMyProfile, updateMyProfile } from '../api/usersApi'
 import { listAnnouncements } from '../api/announcementsApi'
@@ -87,6 +88,11 @@ export function HomePage() {
         <img className="home__logo" src={logo} alt="DOМАКС" width={168} height={67} />
 
         <div className="home__bell">
+          {profile?.role === 'DISPATCHER' && (
+            <Link to="/dispatcher" className="home__dispatcher-tile" aria-label="Панель диспетчера">
+              <img src={dispatcherIcon} alt="" width={51} height={41} />
+            </Link>
+          )}
           <TileLink to="/notifications" icon={bellIcon} label="Уведомления" soft />
         </div>
 
@@ -127,16 +133,6 @@ export function HomePage() {
             </Button>
           </form>
         </BottomSheet>
-
-        {profile?.role === 'DISPATCHER' && (
-          <Link
-            to="/dispatcher"
-            className="card card--brand-outline"
-            style={{ padding: 16, textDecoration: 'none', color: 'inherit', margin: '12px 0' }}
-          >
-            <strong>Панель диспетчера →</strong>
-          </Link>
-        )}
 
         <div className="title-row" style={{ marginTop: 'var(--space-3)' }}>
           <h2 className="section-title" style={{ margin: 0 }}>

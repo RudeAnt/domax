@@ -410,7 +410,20 @@
 .home__bell {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
   margin-top: var(--space-2);
+}
+
+.home__dispatcher-tile {
+  display: inline-flex;
+  line-height: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.home__dispatcher-tile img {
+  display: block;
 }
 
 .home__address {
@@ -662,15 +675,15 @@ select.panel-input {
 
 :root[data-theme='dark'] .send-anim::after {
   background:
-    radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
-    radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+    radial-gradient(120% 90% at 0% 100%, rgba(149, 0, 255, 0.6), transparent 62%),
+    radial-gradient(120% 90% at 100% 100%, rgba(0, 191, 255, 0.5), transparent 62%);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .send-anim::after {
     background:
-      radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
-      radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+      radial-gradient(120% 90% at 0% 100%, rgba(149, 0, 255, 0.6), transparent 62%),
+      radial-gradient(120% 90% at 100% 100%, rgba(0, 191, 255, 0.5), transparent 62%);
   }
 }
 
@@ -724,15 +737,15 @@ select.panel-input {
 
 :root[data-theme='dark'] .splash__gradient {
   background:
-    radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
-    radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+    radial-gradient(120% 90% at 0% 100%, rgba(149, 0, 255, 0.6), transparent 62%),
+    radial-gradient(120% 90% at 100% 100%, rgba(0, 191, 255, 0.5), transparent 62%);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .splash__gradient {
     background:
-      radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
-      radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+      radial-gradient(120% 90% at 0% 100%, rgba(149, 0, 255, 0.6), transparent 62%),
+      radial-gradient(120% 90% at 100% 100%, rgba(0, 191, 255, 0.5), transparent 62%);
   }
 }
 

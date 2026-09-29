@@ -1,3 +1,39 @@
+/*
+  Шрифт по макету — a_FuturaOrto (права на использование улажены с
+  дизайнером/правообладателем, файлы лежат в public/fonts/).
+*/
+@font-face {
+  font-family: 'FuturaOrto';
+  src: url('/fonts/afuturaorto.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'FuturaOrto';
+  src: url('/fonts/afuturaortobold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'FuturaOrto';
+  src: url('/fonts/afuturaortoitalic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'FuturaOrto';
+  src: url('/fonts/afuturaortobolditalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 *,
 *::before,
 *::after {
@@ -37,15 +73,15 @@ body::before {
    фиолетово-голубое свечение прозрачным градиентом. */
 :root[data-theme='dark'] body::before {
   background:
-    radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
-    radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+    radial-gradient(120% 90% at 0% 100%, rgba(149, 0, 255, 0.6), transparent 62%),
+    radial-gradient(120% 90% at 100% 100%, rgba(0, 191, 255, 0.5), transparent 62%);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) body::before {
     background:
-      radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
-      radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+      radial-gradient(120% 90% at 0% 100%, rgba(149, 0, 255, 0.6), transparent 62%),
+      radial-gradient(120% 90% at 100% 100%, rgba(0, 191, 255, 0.5), transparent 62%);
   }
 }
 
