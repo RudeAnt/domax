@@ -70,7 +70,7 @@ function getWebApp(): MaxWebApp | undefined {
   return typeof window !== 'undefined' ? window.WebApp : undefined
 }
 
-export const isInsideMax = (): boolean => Boolean(getWebApp())
+export const isInsideMax = (): boolean => Boolean(getWebApp()?.initData)
 
 export function initMaxBridge(): void {
   const webApp = getWebApp()
