@@ -56,6 +56,28 @@ services:
     networks:
       - domax_net
 
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    container_name: domax_bot
+    restart: always
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      MINI_APP_URL: ${MINI_APP_URL}
+      ADMIN_USER_IDS: ${ADMIN_USER_IDS}
+      NOTIFY_SECRET: ${NOTIFY_SECRET}
+      NOTIFY_PORT: 8081
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./bot:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - domax_net
+
 volumes:
   pgdata:
 
