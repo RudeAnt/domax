@@ -129,16 +129,31 @@ export function HomePage() {
         </BottomSheet>
 
         {profile?.role === 'DISPATCHER' && (
-          <Link to="/dispatcher" className="card card--brand-outline" style={{ padding: 16, textDecoration: 'none', color: 'inherit', margin: '12px 0' }}>
+          <Link
+            to="/dispatcher"
+            className="card card--brand-outline"
+            style={{ padding: 16, textDecoration: 'none', color: 'inherit', margin: '12px 0' }}
+          >
             <strong>Панель диспетчера →</strong>
           </Link>
         )}
 
-        {announcement && (
+        <div className="title-row" style={{ marginTop: 'var(--space-3)' }}>
+          <h2 className="section-title" style={{ margin: 0 }}>
+            Новости
+          </h2>
+          <Link to="/news" className="field-hint">
+            Все →
+          </Link>
+        </div>
+
+        {announcement ? (
           <section className="announcement" aria-label="Объявление">
             <h2 className="announcement__title">{announcement.title}</h2>
             <p className="announcement__text">{announcement.body}</p>
           </section>
+        ) : (
+          <p className="field-hint">Объявлений пока нет.</p>
         )}
 
         <h2 className="section-title">Недавние заявки</h2>
@@ -164,10 +179,13 @@ export function HomePage() {
             <RequestCard key={request.id} request={request} />
           ))}
         </div>
+
+        <p className="field-hint" style={{ textAlign: 'center', marginTop: 8 }}>
+          <Link to="/dev/role">Демо: сменить роль</Link>
+        </p>
       </main>
 
       <BottomNav left="requests" />
     </>
   )
 }
-
