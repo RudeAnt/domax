@@ -59,11 +59,11 @@
   appearance: none; -webkit-appearance: none;
   border: none;
   background: transparent;
-  color: var(--color-text-muted);
-  font-size: 14px;
-  font-weight: 600;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 17px;
+  font-weight: 400;
+  padding: 6px 12px;
+  border-radius: 10px;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -73,7 +73,7 @@
 }
 
 .tab--active {
-  background: var(--color-border);
+  background: var(--color-tab-active);
   color: var(--color-text);
 }
 
@@ -177,3 +177,620 @@
   }
 }
 
+
+/* --- StatusControl (смена статуса диспетчером) ---
+   Размеры из макета: свёрнутая кнопка 51×41, раскрытый столбик 51×123.
+   Картинки экспортированы @2x (102×82 / 102×246), поэтому background-size
+   задан явно. */
+.status-control {
+  position: relative;
+  width: 51px;
+  height: 41px;
+  flex: 0 0 auto;
+}
+
+.status-control__trigger,
+.status-control__picker {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  padding: 0;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+}
+
+.status-control__trigger {
+  display: block;
+  width: 51px;
+  height: 41px;
+  cursor: pointer;
+  border-radius: 10px;
+}
+
+.status-control__trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Раскрытый столбик рисуем поверх места кнопки и вниз, чтобы не двигать вёрстку карточки. */
+.status-control__picker {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  width: 51px;
+  height: 123px;
+  filter: drop-shadow(var(--shadow-md));
+}
+
+/* Три прозрачные кнопки по 41px поверх общей картинки — у каждой свой тач-таргет. */
+.status-control__option {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1 1 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.status-control__option:focus-visible,
+.status-control__trigger:focus-visible {
+  outline: 2px solid var(--color-brand-accent-b);
+  outline-offset: 2px;
+}
+
+
+/* =====================================================================
+   Экраны по макету: плитки, нижняя панель, карточки, форма, заставка
+   ===================================================================== */
+
+/* --- Плитки-кнопки 51×41 --- */
+.tile-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 51px;
+  height: 41px;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  background: var(--nav-tile);
+  cursor: pointer;
+  text-decoration: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tile-btn--soft {
+  background: var(--nav-tile-soft);
+}
+
+.tile-btn img {
+  display: block;
+  width: 51px;
+  height: 41px;
+}
+
+.tile-btn:focus-visible {
+  outline: 2px solid var(--color-brand-accent-b);
+  outline-offset: 2px;
+}
+
+/* --- Нижняя плавающая панель --- */
+.bottom-nav {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  bottom: max(28px, calc(env(safe-area-inset-bottom, 0px) + 16px));
+  transform: translateX(-50%);
+  display: flex;
+  gap: 34px;
+}
+
+/* --- Заголовок экрана: плитка справа сверху, заголовок под ней --- */
+.title-row {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  margin-bottom: var(--space-4);
+}
+
+.title-row > .tile-btn {
+  align-self: flex-end;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.section-title {
+  margin: var(--space-3) 0 0;
+  font-size: 24px;
+  font-weight: 400;
+}
+
+/* --- Список и карточка заявки --- */
+.request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: var(--space-4);
+}
+
+.request-card {
+  position: relative;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 22px;
+  box-shadow: var(--shadow-card);
+}
+
+.request-card__link {
+  display: block;
+  padding: 18px 20px 20px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.request-card__title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.request-card__place {
+  margin: 12px 0 0;
+  font-size: 15px;
+  color: var(--color-text-muted);
+}
+
+.request-card__text {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--color-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.request-card__meta {
+  margin-top: 12px;
+}
+
+.request-card__action {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+.request-card:has(.request-card__action) .request-card__title {
+  padding-right: 60px;
+}
+
+/* --- Уведомления --- */
+.notification {
+  padding: 18px 20px 20px;
+}
+
+.notification .request-card__title {
+  padding-right: 28px;
+}
+
+.notification__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+/* --- Главная --- */
+.home__logo {
+  display: block;
+  width: 168px;
+  height: auto;
+  margin: var(--space-3) auto 0;
+}
+
+.home__bell {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
+.home__address {
+  margin: var(--space-3) 0 0;
+  font-size: 17px;
+  color: var(--color-text-muted);
+}
+
+.announcement {
+  margin-top: var(--space-4);
+  padding: 16px 20px 18px;
+  border: 3px solid transparent;
+  border-radius: 22px;
+  background:
+    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+    var(--gradient-brand) border-box;
+}
+
+.announcement__title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+.announcement__text {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.announcement--link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.announcement--list {
+  position: relative;
+  margin-top: 16px;
+}
+
+.announcement__text--full {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* --- Форма новой заявки: серая панель поверх градиента --- */
+.form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: var(--space-2);
+  padding: 12px 14px 18px;
+  border-radius: 28px;
+  background: var(--color-panel);
+}
+
+.form-panel__close {
+  align-self: flex-end;
+  display: inline-flex;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.panel-input {
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 20px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 18px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.panel-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.panel-input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 0;
+}
+
+.panel-input--area {
+  min-height: 190px;
+  resize: none;
+  line-height: 1.35;
+}
+
+select.panel-input {
+  padding-right: 44px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%23777' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+}
+
+.panel-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.panel-field .field-hint {
+  margin: 0 6px;
+}
+
+.panel-row {
+  display: flex;
+  gap: 14px;
+}
+
+.panel-row .panel-input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.form-panel__error {
+  margin: 0 6px;
+  font-size: 14px;
+  color: var(--color-danger);
+}
+
+/* --- Плитка «Добавьте фото» --- */
+.photo-tile {
+  position: relative;
+}
+
+.photo-tile__label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.photo-tile__preview {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+.photo-tile__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.photo-tile__input:focus-visible + .photo-tile__remove,
+.photo-tile__input:focus-visible ~ * {
+  outline: none;
+}
+
+.photo-tile__remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* --- Кнопка с градиентной рамкой («Отправить») --- */
+.btn-gradient {
+  width: 100%;
+  min-height: 58px;
+  padding: 14px 18px;
+  border: 3px solid transparent;
+  border-radius: 20px;
+  background:
+    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+    var(--gradient-brand) border-box;
+  color: var(--color-text);
+  font-size: 20px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.btn-gradient:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Логотип нарисован чёрным по прозрачному — в тёмной теме инвертируем. */
+:root[data-theme='dark'] .home__logo,
+:root[data-theme='dark'] .splash__logo {
+  filter: invert(1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .home__logo,
+  :root:not([data-theme='light']) .splash__logo {
+    filter: invert(1);
+  }
+}
+
+/* --- Анимация отправки: конверт --- */
+.send-anim {
+  position: fixed;
+  z-index: 200;
+  /* 44px — высота BrandBar: полоса DOМАКС остаётся видна, как в макете */
+  top: 44px;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 560px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-page);
+}
+
+.send-anim::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56%;
+  background: url('../assets/brand/gradient-bottom.jpg') center bottom / 100% 100% no-repeat;
+  z-index: 0;
+}
+
+:root[data-theme='dark'] .send-anim::after {
+  background:
+    radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
+    radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .send-anim::after {
+    background:
+      radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
+      radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+  }
+}
+
+.send-anim img {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+
+/* --- Заставка --- */
+.splash {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 560px);
+  background: var(--color-page);
+  transition: opacity 0.35s ease;
+}
+
+.splash--fading {
+  opacity: 0;
+}
+
+.splash__bar {
+  position: relative;
+  z-index: 2;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-brand-dark);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
+.splash__gradient {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56%;
+  background: url('../assets/brand/gradient-bottom.jpg') center bottom / 100% 100% no-repeat;
+}
+
+:root[data-theme='dark'] .splash__gradient {
+  background:
+    radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
+    radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .splash__gradient {
+    background:
+      radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
+      radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+  }
+}
+
+.splash__gradient--on {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.splash__logo {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash,
+  .splash__gradient {
+    transition: none;
+  }
+}
+
+
+/* --- Секция «Новости» у диспетчера: заголовок + кнопка добавления --- */
+.title-row--news {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--space-3) 0 0;
+}
+
+.title-row--news .section-title {
+  margin: 0;
+}
+
+/* --- Панель создания новости --- */
+.news-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 14px;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  background:
+    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+    var(--gradient-brand) border-box;
+}
+
+.news-composer__row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.news-composer__row .btn-secondary {
+  width: auto;
+  padding: 10px 16px;
+}

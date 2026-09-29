@@ -7,6 +7,7 @@ import { SplashScreen, shouldShowSplash } from './components/SplashScreen'
 import { HomePage } from './pages/HomePage'
 import { NewRequestPage } from './pages/NewRequestPage'
 import { NotificationsPage } from './pages/NotificationsPage'
+import { NewsPage } from './pages/NewsPage'
 import { DevRolePage } from './pages/DevRolePage'
 import { RequestDetailPage } from './pages/RequestDetailPage'
 import { RequestsListPage } from './pages/RequestsListPage'
@@ -25,6 +26,7 @@ export function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/requests" element={<RequestsListPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/news" element={<NewsPage />} />
           <Route path="/new" element={<NewRequestPage />} />
           <Route path="/requests/:id" element={<RequestDetailPage />} />
           <Route path="/dev/playground" element={<PlaygroundPage />} />

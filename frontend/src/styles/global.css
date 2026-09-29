@@ -13,9 +13,48 @@ body,
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background: var(--color-bg);
+  background: var(--color-page);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Градиент снизу экрана — неподвижный, карточки при прокрутке едут поверх
+   (как в видео-прототипе). Ширина ограничена колонкой приложения. */
+body::before {
+  content: '';
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(100%, 560px);
+  height: 56vh;
+  background: url('../assets/brand/gradient-bottom.jpg') center bottom / 100% 100% no-repeat;
+}
+
+/* В тёмной теме картинка (она уходит в белый) не подходит — рисуем то же
+   фиолетово-голубое свечение прозрачным градиентом. */
+:root[data-theme='dark'] body::before {
+  background:
+    radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
+    radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) body::before {
+    background:
+      radial-gradient(120% 90% at 0% 100%, rgba(166, 45, 255, 0.6), transparent 62%),
+      radial-gradient(120% 90% at 100% 100%, rgba(46, 197, 255, 0.5), transparent 62%);
+  }
+}
+
+/* Обёртка <MaxUI> красит фон и текст по своей схеме (светлая/тёмная от
+   системы) — из-за этого не виден градиент и не работает ручной переключатель
+   темы. Отдаём фон и цвет нашим токенам. */
+#root > [class*='MaxUI'] {
+  background-color: transparent;
+  color: inherit;
 }
 
 button,
@@ -88,8 +127,9 @@ a {
 
 .app-content {
   flex: 1;
-  padding: var(--space-4);
-  padding-bottom: var(--space-6);
+  padding: var(--space-4) 28px;
+  /* место под плавающую нижнюю панель (41px плитка + отступы) */
+  padding-bottom: calc(41px + var(--space-5) * 2 + env(safe-area-inset-bottom, 0px));
 }
 
 .card {

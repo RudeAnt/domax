@@ -3,17 +3,60 @@ import { getToken } from '../lib/auth'
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
+export interface CreateAnnouncementInput {
+  title: string
+  body: string
+}
+
+function authHeaders(): HeadersInit {
+  const token = getToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+async function parseOrThrow<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    let message = `Ошибка запроса: ${res.status}`
+    try {
+      const body = await res.json()
+      if (body?.message) message = Array.isArray(body.message) ? body.message.join(', ') : body.message
+    } catch {
+      // тело не JSON — оставляем дефолтное сообщение
+    }
+    throw new Error(message)
+  }
+  if (res.status === 204) return undefined as T
+  return res.json()
+}
+
 /**
- * Ждёт GET /announcements на бэке — сущности «Новости»/объявлений пока
- * нет вообще (ни таблицы, ни модуля). До появления бэка возвращает
- * пустой массив на любую ошибку — баннер на HomePage просто не рендерится,
- * без выдуманного контента.
+ * GET /announcements — список объявлений УК, самые новые первыми (бэк уже
+ * сортирует). На HomePage используется только announcements[0] для баннера,
+ * NewsPage показывает весь список. На ошибку сети возвращаем пустой массив,
+ * чтобы баннер/страница просто не показывали контент, а не падали.
  */
 export async function listAnnouncements(): Promise<Announcement[]> {
-  const token = getToken()
   const res = await fetch(`${BASE_URL}/announcements`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    headers: authHeaders(),
   })
   if (!res.ok) return []
   return res.json()
+}
+
+/** POST /announcements — только для роли DISPATCHER, бэк проверяет RolesGuard. */
+export async function createAnnouncement(input: CreateAnnouncementInput): Promise<Announcement> {
+  const res = await fetch(`${BASE_URL}/announcements`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(input),
+  })
+  return parseOrThrow<Announcement>(res)
+}
+
+/** DELETE /announcements/:id — только для роли DISPATCHER, бэк проверяет RolesGuard. */
+export async function deleteAnnouncement(id: string): Promise<void> {
+  const res = await fetch(`${BASE_URL}/announcements/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  })
+  await parseOrThrow<void>(res)
 }

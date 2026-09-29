@@ -1,0 +1,52 @@
+{
+  "hash": "e2cc226b",
+  "configHash": "49acd256",
+  "lockfileHash": "298be792",
+  "browserHash": "ad1e72bc",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "ce42bb4d",
+      "needsInterop": true
+    },
+    "@maxhub/max-ui": {
+      "src": "../../node_modules/@maxhub/max-ui/dist/index.js",
+      "file": "@maxhub_max-ui.js",
+      "fileHash": "8ac1e75e",
+      "needsInterop": false
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "8da919fb",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "e53d1353",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.js",
+      "file": "react-router-dom.js",
+      "fileHash": "0133351e",
+      "needsInterop": false
+    },
+    "react-dom": {
+      "src": "../../node_modules/react-dom/index.js",
+      "file": "react-dom.js",
+      "fileHash": "8394596b",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "chunk-FPLXBGQQ": {
+      "file": "chunk-FPLXBGQQ.js"
+    },
+    "chunk-KWUQWS3S": {
+      "file": "chunk-KWUQWS3S.js"
+    }
+  }
+}
